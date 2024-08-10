@@ -1,11 +1,8 @@
-#ifndef FIELD_FIELD_H_
-#define FIELD_FIELD_H_
+#ifndef FIELD_H_
+#define FIELD_H_
 
 #include <gslib.h>
-#include"app/Actors/ActorManager/ActorManager.h"
-#include"app/Actors/Actor/Actor.h"
 
-// ‘O•ûéŒ¾
 class Ray;
 class Line;
 class BoundingSphere;

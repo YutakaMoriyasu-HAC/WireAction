@@ -148,12 +148,17 @@
   <ItemGroup>
     <ClCompile Include="resource\src\app\Actors\ActorManager\ActorManager.cpp" />
     <ClCompile Include="resource\src\app\Actors\Actor\Actor.cpp" />
+    <ClCompile Include="resource\src\app\Actors\CameraTps\CameraRotateAround.cpp" />
+    <ClCompile Include="resource\src\app\Actors\CameraTps\CameraTps.cpp" />
+    <ClCompile Include="resource\src\app\Actors\Player\Player.cpp" />
+    <ClCompile Include="resource\src\app\AnimatedMesh\AnimatedMesh.cpp" />
     <ClCompile Include="resource\src\app\BoundingSpheres\BoundingSphere.cpp" />
     <ClCompile Include="resource\src\app\Effect\Effect.cpp" />
     <ClCompile Include="resource\src\app\Effect\EffectManager.cpp" />
     <ClCompile Include="resource\src\app\Effect\FollowEffect.cpp" />
     <ClCompile Include="resource\src\app\Field\Field.cpp" />
     <ClCompile Include="resource\src\app\Input\InputManager.cpp" />
+    <ClCompile Include="resource\src\app\Light\Light.cpp" />
     <ClCompile Include="resource\src\app\Main\main.cpp" />
     <ClCompile Include="resource\src\app\Math\Random.cpp" />
     <ClCompile Include="resource\src\app\Scenes\GamePlayScene\GamePlayScene.cpp" />
@@ -169,12 +174,17 @@
   <ItemGroup>
     <ClInclude Include="resource\src\app\Actors\ActorManager\ActorManager.h" />
     <ClInclude Include="resource\src\app\Actors\Actor\Actor.h" />
+    <ClInclude Include="resource\src\app\Actors\CameraTps\CameraRotateAround.h" />
+    <ClInclude Include="resource\src\app\Actors\CameraTps\CameraTps.h" />
+    <ClInclude Include="resource\src\app\Actors\Player\Player.h" />
+    <ClInclude Include="resource\src\app\AnimatedMesh\AnimatedMesh.h" />
     <ClInclude Include="resource\src\app\BoundingSpheres\BoundingSphere.h" />
     <ClInclude Include="resource\src\app\Effect\Effect.h" />
     <ClInclude Include="resource\src\app\Effect\EffectManager.h" />
     <ClInclude Include="resource\src\app\Effect\FollowEffect.h" />
     <ClInclude Include="resource\src\app\Field\Field.h" />
     <ClInclude Include="resource\src\app\Input\InputManager.h" />
+    <ClInclude Include="resource\src\app\Light\Light.h" />
     <ClInclude Include="resource\src\app\Math\Math.h" />
     <ClInclude Include="resource\src\app\Math\Random.h" />
     <ClInclude Include="resource\src\app\NameList\Assets.h" />

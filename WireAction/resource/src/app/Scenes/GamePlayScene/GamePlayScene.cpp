@@ -1,137 +1,72 @@
-#include"GamePlayScene.h"
+#include "GamePlayScene.h"
+#include "app/Field/Field.h"
+#include "app/Actors/CameraTps/CameraRotateAround.h"
+#include "app/Light/Light.h"
+#include "app/Actors/Player/Player.h"
+#include "app/NameList/Assets.h"
 
-#include"app/NameList/Assets.h"
-#include"PlaySceneState.h"
+//開始
+void GamePlayScene::start() {
+	//終了フラグを初期化
+	is_end_ = false;
 
-#include "app/Actors/Actor/Actor.h"
-#include"PlayingState.h"
-#include"PauseState.h"
+	//プレイヤーのメッシュの読み込み
+	gsLoadSkinMesh(Mesh_Player, "resource/Assets/Player/player.msh");
 
+	//スカイドーム用のメッシュを読み込む
+	gsLoadMesh(Mesh_Skybox, "resource/Assets/Skybox/skydome.msh");
+	//描画用のオクトリーを読み込む
+	gsLoadOctree(Octree_Stage, "resource/Assets/Octree/stage.oct");
+	//衝突判定用のオクトリーを読み込む
+	gsLoadOctree(Octree_Collider, "resource/Assets/Octree/stage_collider.oct");
 
-#include<gslib.h>
+	//フィールドクラスの追加
+	world_.add_field(new Field{ Octree_Stage, Octree_Collider, Mesh_Skybox });
+	//カメラクラスの追加
+	world_.add_camera(new CameraRotateAround{ &world_, GSvector3{ 0.0f, 3.2f, -4.8f }, GSvector3{ 0.0f, 1.92f, 0.0f } });
+	//ライトクラスの追加
+	world_.add_light(new Light{ &world_ });
 
-
-const int SE_COUNT = 10; // 同時に鳴らせるSEの数
-
-
-GamePlayScene::GamePlayScene()
-{
-	stateMachine_.addState<PlayingState>(stateTag::PlayingState, &stateMachine_, &world_);
-	stateMachine_.addState<PauseState>(stateTag::PauseState, &stateMachine_);
-
-}
-
-void GamePlayScene::start()
-{
-	stateMachine_.reset(stateTag::PlayingState);
-
-
-}
-
-void GamePlayScene::update(float delta_time)
-{
-
-	stateMachine_.update();
-	stateMachine_.lateUpdate();
-
+	//プレイヤーの追加
+	world_.add_actor(new Player{ &world_, GSvector3{ 0.0f, 0.125f, 0.0f } });
+	
 
 }
 
-void GamePlayScene::draw()
-{
-	stateMachine_.draw();
-	stateMachine_.lateDraw();
+//更新
+void GamePlayScene::update(float delta_time) {
+	//エンターキーでシーン終了としておく
+	if (gsGetKeyTrigger(GKEY_RETURN)) {
+		is_end_ = true;
+	}
+	//ワールドの更新
+	world_.update(delta_time);
 }
 
+//描画
+void GamePlayScene::draw() const {
+	//ワールドの描画
+	world_.draw();
+}
 
+//終了しているか？
+bool GamePlayScene::is_end() const {
+	return is_end_;		//終了フラグを返す
+}
 
-std::string GamePlayScene::next() const
-{
+//次のシーンを返す
+std::string GamePlayScene::next() const {
 	return "TitleScene";
 }
 
-void GamePlayScene::end()
-{
-	//world_.actorsClear();
+//終了
+void GamePlayScene::end() {
+	//ワールドを消去
 	world_.clear();
-	clearAssets();
-
-
-
-	// シャドウマップを削除
-	gsDeleteShadowMap();
-}
-
-
-
-
-void GamePlayScene::updatePlaying(float delta_time)
-{
-	//リザルト中タイマを初期化
-	resultTimer_ = 0.0f;
-}
-
-void GamePlayScene::updateResult(float delta_time)
-{
-	// リザルトの更新
-	//リザルトシーンのアップデート関数をここに書く
-	// リザルト中タイマの更新
-	resultTimer_ += delta_time;
-	// 最低1秒間はリザルト表示、スペースキーを押したらシーン終了
-	if (resultTimer_ >= 60.0f && gsGetKeyTrigger(GKEY_SPACE))
-	{
-		isEnd_ = true;
-	}
-}
-
-void GamePlayScene::loadAssets()
-{
-	
-}
-
-void GamePlayScene::clearAssets()
-{
-	
-
-
-}
-
-bool GamePlayScene::getOption()
-{
-	return is_option;
-}
-
-void GamePlayScene::setOption(bool option)
-{
-	is_option = option;
-}
-
-bool GamePlayScene::getExit()
-{
-	return is_exit;
-}
-
-void GamePlayScene::setExit(bool exit)
-{
-	is_exit = exit;
-}
-
-bool GamePlayScene::getTutorial()
-{
-	return is_tutorial;
-}
-
-void GamePlayScene::setTutorial(bool tutorial)
-{
-	is_tutorial = tutorial;
-}
-
-bool GamePlayScene::getClose()
-{
-	return is_close;
-}
-
-void GamePlayScene::setClose(bool close)
-{
-	is_close = close;
+	//メッシュの削除
+	gsDeleteSkinMesh(Mesh_Player);
+	gsDeleteMesh(Mesh_Skybox);
+	//オクトリーの削除
+	gsDeleteOctree(Octree_Stage);
+	gsDeleteOctree(Octree_Collider);
 }

@@ -1,4 +1,4 @@
-#include "Actor.h"
+#include "app/Actors/Actor/Actor.h"
 
 //更新
 void Actor::update(float) {}
@@ -19,7 +19,7 @@ void Actor::draw_gui() const {}
 void Actor::react(Actor&) {}
 
 //メッセージ処理
-void Actor::handle_message(const std::string& message, void* param) {}
+void Actor::handle_message(const std::string& message, void*param) {}
 
 //衝突判定
 void Actor::collide(Actor& other) {
@@ -77,14 +77,4 @@ GSvector3 Actor::velocity() const {
 //衝突判定データを取得
 BoundingSphere Actor::collider() const {
 	return collider_.transform(transform_.localToWorldMatrix());
-}
-
-// エフェクシアのエフェクトを再生する
-void Actor::play_effect(GSuint id, const GSvector3& local_position, const GSvector3& local_rotation, const GSvector3& local_scale) {
-	// 指定されたTranslate, Rotation, Scaleの行列を作成する
-	GSmatrix4 local_matrix = GSmatrix4::TRS(local_position, GSquaternion::euler(local_rotation), local_scale);
-	// ワールド空間に変換する
-	GSmatrix4 world_matrix = local_matrix * transform_.localToWorldMatrix();
-	// エフェクトを再生する
-	//gsPlayEffectEx(id, &world_matrix);
 }

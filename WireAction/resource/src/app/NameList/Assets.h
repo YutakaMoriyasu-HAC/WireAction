@@ -1,53 +1,16 @@
-#ifndef NAMELIST_ASSETS_H_
-#define NAMELIST_ASSETS_H_
+#ifndef ASSETS_H_
+#define ASSETS_H_
 
-//モデル関連　100～
-enum
-{
-
-
-};
-//テクスチャー関連301～
-enum
-{
-
+//メッシュデータ
+enum {
+	Mesh_Player,		//自機
+	Mesh_Skybox			//スカイボックス
 };
 
-enum
-{
-
+//オクトリー
+enum {
+	Octree_Stage,		//ステージ用オクトリー
+	Octree_Collider		//衝突判定用オクトリー
 };
 
-enum
-{
-
-
-};
-
-//エフェクト関連500～
-enum
-{
-
-
-
-};
-//スカイボックス
-enum
-{
-
-};
-
-//Octree
-enum
-{
-
-
-};
-
-
-//ライト
-enum
-{
-
-};
 #endif

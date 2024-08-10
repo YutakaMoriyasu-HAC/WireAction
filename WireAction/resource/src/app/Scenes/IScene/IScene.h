@@ -13,48 +13,13 @@ public:
 	//更新
 	virtual void update(float delta_time) = 0;
 	//描画
-	virtual void draw() = 0;
+	virtual void draw() const = 0;
+	//終了しているか？
+	virtual bool is_end() const = 0;
 	//次のシーン名を返す
 	virtual std::string next() const = 0;
 	//終了
 	virtual void end() = 0;
-
-	// 読み込み
-	void load()
-	{
-		isLoadEnd_ = false;
-		loadAssets();
-		isLoadEnd_ = true;
-	};
-
-	// 読み込みは終了したか
-	bool isLoadEnd()
-	{
-		return isLoadEnd_;
-	}
-
-	//終了しているか
-	bool isEnd()const
-	{
-		return isEnd_;
-	}
-
-protected:
-	// シーンを終了する
-	void sceneEnd()
-	{
-		isEnd_ = true;
-	}
-
-	virtual void loadAssets() {};
-
-protected:
-	bool isEnd_{ false };
-	std::string name_;
-
-private:
-	bool isLoadEnd_{ false };	// 読み込み終了フラグ
-
 };
 
 #endif

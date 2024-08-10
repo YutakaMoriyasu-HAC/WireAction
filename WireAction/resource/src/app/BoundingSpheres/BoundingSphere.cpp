@@ -1,8 +1,8 @@
-#include "BoundingSphere.h"
+#include "app/BoundingSpheres/BoundingSphere.h"
 
 //コンストラクタ
-BoundingSphere::BoundingSphere(float radius, const GSvector3& center) :
-	radius{ radius }, center{ center } {
+BoundingSphere::BoundingSphere(float radius,const GSvector3& center) :
+	radius{ radius }, center{ center }{
 }
 
 //平行移動
@@ -24,7 +24,7 @@ bool BoundingSphere::intersects(const BoundingSphere& other) const {
 //デバッグ表示
 void BoundingSphere::draw() const {
 	glPushMatrix();
-	glTranslatef(center.x, center.y, center.z);
-	glutWireSphere(radius, 16, 16);	//ワイヤーフレームの球体を描画
+		glTranslatef(center.x, center.y, center.z);
+		glutWireSphere(radius, 16, 16);	//ワイヤーフレームの球体を描画
 	glPopMatrix();
 }

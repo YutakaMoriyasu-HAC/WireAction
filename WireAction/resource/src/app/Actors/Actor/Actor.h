@@ -56,7 +56,7 @@ public:
 
 protected:
 	//ワールド
-	IWorld* world_{ nullptr };
+	IWorld*			world_{ nullptr };
 	//タグ名
 	std::string		tag_;
 	//名前
@@ -71,8 +71,6 @@ protected:
 	BoundingSphere	collider_;
 	//死亡フラグ
 	bool			dead_{ false };
-	// エフェクシアのエフェクトを再生する
-	void            play_effect(GSuint id, const GSvector3& local_position, const GSvector3& local_rotation, const GSvector3& local_scale);
 };
 
 #endif
