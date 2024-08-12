@@ -4,9 +4,11 @@
 #include "app/Ray/Line.h"
 
 //プレイヤーからの相対座標(z座標のみ)
-const GSvector3 PlayerOffset{ 0.0f, 0.0f, -5.0f };
+GSvector3 PlayerOffset{ 0.0f, 0.0f, -5.0f };
 //カメラの注視点の補正値
 const GSvector3 ReferencePointOffset{ 0.0f,1.8f,0.0f };
+
+float CameraSensitivity{ 2.0f };
 
 //コンストラクタ
 CameraRotateAround::CameraRotateAround(
@@ -32,19 +34,24 @@ CameraRotateAround::CameraRotateAround(
 //更新
 void CameraRotateAround::update(float delta_time) {
 	//プレイヤーを検索
-	Actor* player = world_->find_actor("Player");
+	std::shared_ptr<Actor> player = world_->find_actor("Player");
 	if (player == nullptr) return;
 
 	//y軸まわりにカメラを回転させる
-	if (gsGetKeyState(GKEY_LEFT))	yaw_ -= 1.0f * delta_time;
-	if (gsGetKeyState(GKEY_RIGHT))	yaw_ += 1.0f * delta_time;
+	if (gsGetKeyState(GKEY_LEFT))	yaw_ -= CameraSensitivity * delta_time;
+	if (gsGetKeyState(GKEY_RIGHT))	yaw_ += CameraSensitivity * delta_time;
 	//x軸まわりにカメラを回転させる
-	if (gsGetKeyState(GKEY_UP))		pitch_ -= 1.0f * delta_time;
-	if (gsGetKeyState(GKEY_DOWN))	pitch_ += 1.0f * delta_time;
+	if (gsGetKeyState(GKEY_UP))		pitch_ -= CameraSensitivity * delta_time;
+	if (gsGetKeyState(GKEY_DOWN))	pitch_ += CameraSensitivity * delta_time;
 	//x軸まわりの回転角度の制限をする
-	pitch_ = CLAMP(pitch_, -10.0f, 30.0f);
+	pitch_ = CLAMP(pitch_, -20.0f, 25.0f);
 
-	
+	if (pitch_ > 0) {
+		PlayerOffset.z=-(pitch_ / 2) -5 ;
+	}
+	else {
+		PlayerOffset.z =- 5;
+	}
 
 	//注視点の座標を求める
 	GSvector3 at = player->transform().position() + ReferencePointOffset;

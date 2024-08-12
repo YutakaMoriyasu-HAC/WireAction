@@ -3,18 +3,12 @@
 #include "app/Field/Field.h"
 #include "app/Ray/Line.h"
 #include "app/NameList/Assets.h"
+#include "app/Namelist/PlayerStateList.h"
+#include "PlayerMoveState.h"
+#include "PlayerJumpState.h"
+#include "app/Input/InputManager.h"
 
-//モーション番号
-enum {
-	MotionIdle = 1,     // アイドル
-	MotionForwardWalk = 2,     // 前進
-	MotionBackwardWalk = 3,     // 後退
-	MotionLeftWalk = 4,     // 左歩き
-	MotionRightWalk = 5,     // 右歩き
-	MotionFire = 11,    // 射撃
-	MotionDamage = 14,    // ダメ―ジ
-	MotionJump = 17     // ジャンプ
-};
+
 
 //移動速度
 const float WalkSpeed{ 0.1f }; //0.025
@@ -32,7 +26,6 @@ Player::Player(IWorld* world, const GSvector3& position) :
 	mesh_{ Mesh_Player, MotionIdle, true },
 	motion_{ MotionIdle },
 	motion_loop_{ true },
-	state_{ State::Move },
 	state_timer_{ 0.0f } {
 	//ワールドを設定
 	world_ = world;
@@ -46,12 +39,16 @@ Player::Player(IWorld* world, const GSvector3& position) :
 	transform_.position(position);
 	//メッシュの変換行列を初期化
 	mesh_.transform(transform_.localToWorldMatrix());
+
+	InitState();
+	lerpSize_ = mesh_.DefaultLerpTime;
 }
 
 //更新
 void Player::update(float delta_time) {
-	//状態の更新
-	update_state(delta_time);
+	//入力処理
+	ControllerUpdate();
+
 	//重力値を更新
 	velocity_.y += Gravity * delta_time;
 	//重力を加える
@@ -64,6 +61,13 @@ void Player::update(float delta_time) {
 	mesh_.update(delta_time);
 	//ワールド変換行列を設定
 	mesh_.transform(transform_.localToWorldMatrix());
+	//ステートマシンを動かす
+	stateMachine_.update();
+}
+
+void Player::lateUpdate(float delta_time) {
+	//フレームの最後に今のフレームの入力状態を記録
+	input2_ = input_;
 }
 
 //描画
@@ -76,8 +80,7 @@ void Player::draw() const {
 
 //衝突リアクション
 void Player::react(Actor& other) {
-	//ダメージ中の場合は何もしない
-	if (state_ == State::Damage) return;
+
 	//敵の攻撃判定と衝突したか？
 	if (other.tag() == "EnemyAttackTag") {
 		//ターゲット方向のベクトルを求める
@@ -87,7 +90,7 @@ void Player::react(Actor& other) {
 		//ターゲット方向と逆方向にノックバックする移動量を求める
 		velocity_ = -to_target.getNormalized() * 0.4f;
 		//ダメージ状態に遷移する
-		change_state(State::Damage, MotionDamage, false);
+		//change_state(State::Damage, MotionDamage, false);
 		return;
 	}
 	//敵と衝突したか？
@@ -99,85 +102,46 @@ void Player::react(Actor& other) {
 	
 }
 
-//状態の更新
-void Player::update_state(float delta_time) {
-	//状態遷移
-	switch (state_) {
-	case State::Move:	move(delta_time);	break;
-	case State::Attack:	attack(delta_time);	break;
-	case State::Damage:	damage(delta_time);	break;
-	}
-	//状態タイマの更新
-	state_timer_ += delta_time;
+// モーションが終了しているか
+const bool Player::IsMotionEnd() const
+{
+	return stateMachine_.getNowStateTimer() >= GetMotionEndTime();
 }
 
-//状態の変更
-void Player::change_state(State state, GSuint motion, bool loop) {
+//モーション変更、速度も変更
+void Player::ChangeMotionS(GSuint motion, bool loopFlag, float speed, float lerp, float endTime, float startTime)
+{
 	motion_ = motion;
-	motion_loop_ = loop;
-	state_ = state;
+	motionLoop_ = loopFlag;
 	state_timer_ = 0.0f;
+	startTime_ = startTime;
+	animSpeed_ = speed;
+	lerpSize_ = lerp;
+	motionEndTimePlus_ = endTime;
+
 }
 
-//移動処理
-void Player::move(float delta_time) {
-
-	//スペースキーで弾を撃つ
-	if (gsGetKeyState(GKEY_SPACE)) {
-		//攻撃状態に遷移する
-		change_state(State::Attack, MotionFire);
-		
-		return;
-	}
-
-	//カメラの前方向ベクトルを取得
-	GSvector3 forward = world_->camera()->transform().forward();
-	forward.y = 0.0f;
-	//カメラの右方向ベクトルを取得
-	GSvector3 right = world_->camera()->transform().right();
-	right.y = 0.0f;
-	//キーの入力値から移動ベクトルを計算
-	GSvector3 velocity{ 0.0f,0.0f,0.0f };
-	if (gsGetKeyState(GKEY_W)) velocity +=  forward;
-	if (gsGetKeyState(GKEY_S)) velocity += -forward;
-	if (gsGetKeyState(GKEY_A)) velocity += -right;
-	if (gsGetKeyState(GKEY_D)) velocity +=  right;
-	velocity = velocity.normalized() * WalkSpeed * delta_time;
-
-	//移動してなければアイドル状態
-	GSuint motion{ MotionIdle };
-	//移動しているか？
-	if (velocity.length() != 0.0f) {
-		//向きの補間
-		GSquaternion rotation =
-			GSquaternion::rotateTowards(
-				transform_.rotation(),
-				GSquaternion::lookRotation(velocity), 12.0f * delta_time);
-		transform_.rotation(rotation);
-
-		//移動中のモーションにする
-		motion = MotionForwardWalk;
-	}
-	
-	//モーションの変更
-	change_state(State::Move, motion);
-
-	//移動量のxz成分だけ更新
-	velocity_.x = velocity.x;
-	velocity_.z = velocity.z;
-
-	//平行移動する(ローカル座標系基準)
-	transform_.translate(velocity_, GStransform::Space::World);
-	
+// モーションの終了時間を取得
+const float Player::GetMotionEndTime() const
+{
+	return mesh_.motionEndTime() - motionEndTimePlus_;
 }
 
-//攻撃中
-void Player::attack(float delta_time) {
-	//攻撃モーションの終了を待つ
-	if (state_timer_ >= mesh_.motion_end_time()) {
-		move(delta_time);
-	}
+//座標を返す
+const GSvector3 Player::GetPosition() const
+{
+	return transform_.position();
 }
+
+//座標にワープ
+void Player::SetPosition(GSvector3 pos)
+{
+	transform_.position(pos);
+}
+
+
+
+
 
 //ダメージ中
 void Player::damage(float delta_time) {
@@ -187,8 +151,8 @@ void Player::damage(float delta_time) {
 	velocity_ -= GSvector3{ velocity_.x,0.0f,velocity_.z } * 0.5f * delta_time;
 
 	//ダメージモーションの終了を待つ
-	if (state_timer_ >= mesh_.motion_end_time()) {
-		move(delta_time);
+	if (state_timer_ >= mesh_.motionEndTime()) {
+		//move(delta_time);
 	}
 }
 
@@ -217,6 +181,10 @@ void Player::collide_field() {
 		transform_.position(position);
 		//重力を初期化する
 		velocity_.y = 0.0f;
+		isGround_ = true;
+	}
+	else {
+		isGround_ = false;
 	}
 }
 
@@ -240,3 +208,74 @@ void Player::collide_actor(Actor& other) {
 	collide_field();
 }
 
+//ステート管理
+void Player::InitState() {
+	stateMachine_.addState(PlayerStateList::State_Walk, std::make_shared<PlayerMoveState>(this, world_, &stateMachine_));
+	stateMachine_.addState(PlayerStateList::State_Jump, std::make_shared<PlayerJumpState>(this, world_, &stateMachine_));
+
+
+	// ステートマシンの初期化
+	stateMachine_.reset(PlayerStateList::State_Walk);
+}
+
+//ステート変更
+void Player::changeState(const int state) {
+	stateMachine_.chengeState(state);
+}
+
+//入力処理
+void Player::ControllerUpdate() {
+	// 入力
+	input_ = MoveInput().normalized();
+}
+
+//最後に向いていた方向を返す
+const GSvector3 Player::GetInputDirection() const {
+	return input_Direction_;
+}
+
+//最後に向いていた方向をセット
+void Player::SetInputDirection(GSvector3 direction) {
+	input_Direction_ = direction;
+}
+
+//入力があれば入力方向を、なければ向いてる方向を返す
+const GSvector3 Player::GetInput() const {
+	if (input_ != GSvector3::zero()) {
+		return input_;
+	}
+	else {
+		return GetInputDirection();
+	}
+}
+
+// 入力
+GSvector3 Player::MoveInput()
+{
+	GSvector3 velocity{ 0.0f,0.0f,0.0f };
+	// カメラの方向ベクトルを取得
+	GSvector3 forward = world_->camera()->transform().forward();
+	//GSvector3 forward = GSvector3(0, 0, -1);
+	forward.y = 0.0f;
+	// カメラの右方ベクトルを取得
+	GSvector3 right = world_->camera()->transform().right();
+	right.y = 0.0f;
+	GSvector2 vec2 = InputManager::Move();
+	velocity += vec2.y * forward;
+	velocity += vec2.x * right;
+	return velocity;
+}
+
+bool Player::isGround() {
+	return isGround_;
+}
+
+//注視点取得
+GSvector3 Player::getCameraLookPoint() {
+	return cameraLookPoint_;
+}
+
+//注視点セット
+void Player::setCameraLookPoint(GSvector3 point) {
+	cameraLookPoint_ = point;
+}

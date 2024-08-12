@@ -1,10 +1,29 @@
 #include<GSgame.h>
 #include"app/Scenes/SceneManager/SceneManager.h"
 #include "app/Scenes/GamePlayScene/GamePlayScene.h"
+#include "app/screen/ScreenSize.h"
+#include"app/Input/InputManager.h"
 
 class MyGame : public gslib::Game {
+
+public:
+
 	//シーンマネージャー
 	SceneManager scene_manager_;
+
+#ifdef _DEBUG
+	// コンストラクタ
+	MyGame() : gslib::Game{ app::ScreenSize::width,app::ScreenSize::height
+	}{
+		isEnd_ = false;
+	}
+#else
+	// コンストラクタ
+	MyGame() : gslib::Game{ app::ScreenSize::width,app::ScreenSize::height , true } {
+		isEnd_ = false;
+	}
+
+#endif
 
 	//開始
 	void start() override {
@@ -18,6 +37,12 @@ class MyGame : public gslib::Game {
 	void update(float delta_time) override {
 		//ワールドクラスの更新
 		scene_manager_.update(delta_time);
+
+		// 終了
+		if (InputManager::IsGameEndState())
+		{
+			isEnd_ = true;
+		}
 	}
 
 	//描画
@@ -33,6 +58,15 @@ class MyGame : public gslib::Game {
 		//シーンの消去
 		scene_manager_.clear();
 	}
+
+	bool is_running() override {
+		return !isEnd_;
+	}
+
+
+private:
+	bool isEnd_;
+
 };
 
 //メイン関数

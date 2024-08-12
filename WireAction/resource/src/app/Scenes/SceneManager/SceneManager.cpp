@@ -1,5 +1,6 @@
 #include "SceneManager.h"
 #include "app/Scenes/SceneNull/SceneNull.h"
+#include "app/time/Time.h"
 
 static SceneNull scene_null; //nullシーン(何もしないダミーシーン)
 
@@ -17,6 +18,11 @@ SceneManager::~SceneManager() {
 void SceneManager::update(float delta_time) {
 	//シーンの更新
 	current_scene_->update(delta_time);
+
+	//デルタタイム
+	float deltaTime = delta_time;
+	app::Time::UpdateDeltaTime(deltaTime);
+
 	//シーンが終了しているか？
 	if (current_scene_->is_end()) {
 		//シーンを変更する

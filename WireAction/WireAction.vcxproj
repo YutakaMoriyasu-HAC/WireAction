@@ -151,6 +151,8 @@
     <ClCompile Include="resource\src\app\Actors\CameraTps\CameraRotateAround.cpp" />
     <ClCompile Include="resource\src\app\Actors\CameraTps\CameraTps.cpp" />
     <ClCompile Include="resource\src\app\Actors\Player\Player.cpp" />
+    <ClCompile Include="resource\src\app\Actors\Player\PlayerJumpState.cpp" />
+    <ClCompile Include="resource\src\app\Actors\Player\PlayerMoveState.cpp" />
     <ClCompile Include="resource\src\app\AnimatedMesh\AnimatedMesh.cpp" />
     <ClCompile Include="resource\src\app\BoundingSpheres\BoundingSphere.cpp" />
     <ClCompile Include="resource\src\app\Effect\Effect.cpp" />
@@ -177,6 +179,8 @@
     <ClInclude Include="resource\src\app\Actors\CameraTps\CameraRotateAround.h" />
     <ClInclude Include="resource\src\app\Actors\CameraTps\CameraTps.h" />
     <ClInclude Include="resource\src\app\Actors\Player\Player.h" />
+    <ClInclude Include="resource\src\app\Actors\Player\PlayerJumpState.h" />
+    <ClInclude Include="resource\src\app\Actors\Player\PlayerMoveState.h" />
     <ClInclude Include="resource\src\app\AnimatedMesh\AnimatedMesh.h" />
     <ClInclude Include="resource\src\app\BoundingSpheres\BoundingSphere.h" />
     <ClInclude Include="resource\src\app\Effect\Effect.h" />
@@ -188,6 +192,7 @@
     <ClInclude Include="resource\src\app\Math\Math.h" />
     <ClInclude Include="resource\src\app\Math\Random.h" />
     <ClInclude Include="resource\src\app\NameList\Assets.h" />
+    <ClInclude Include="resource\src\app\NameList\PlayerStateList.h" />
     <ClInclude Include="resource\src\app\Ray\Line.h" />
     <ClInclude Include="resource\src\app\Ray\Ray.h" />
     <ClInclude Include="resource\src\app\Scenes\GamePlayScene\GamePlayScene.h" />

@@ -27,11 +27,11 @@ void AnimatedMesh::update(float delta_time) {
 	// ループアニメーションか？
 	if (motion_loop_) {
 		// モーションタイマをループさせる
-		motion_timer_ = std::fmod(motion_timer_, motion_end_time());
+		motion_timer_ = std::fmod(motion_timer_, motionEndTime());
 	}
 	else {
 		// モーションタイマをクランプする
-		motion_timer_ = std::min(motion_timer_, motion_end_time() - 1.0f);
+		motion_timer_ = std::min(motion_timer_, motionEndTime() - 1.0f);
 	}
 	// 補間タイマの更新(LerpTime以上にならないようにクランプする）
 	lerp_timer_ = std::min(lerp_timer_ + delta_time, LerpTime);
@@ -98,7 +98,7 @@ bool AnimatedMesh::is_end_motion() const {
 	//ループのモーションは終了しない
 	if (motion_loop_)return false;
 	//終了しているか？
-	return motion_timer_ >= (motion_end_time() - 1.0f);
+	return motion_timer_ >= (motionEndTime() - 1.0f);
 }
 
 //現在のモーションの再生時間を取得
@@ -112,7 +112,7 @@ void AnimatedMesh::motion_time(float time) {
 }
 
 //モーションの終了時間を取得
-float AnimatedMesh::motion_end_time() const {
+float AnimatedMesh::motionEndTime() const {
 	return gsGetEndAnimationTime(id_, motion_);
 }
 

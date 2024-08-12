@@ -4,7 +4,7 @@
 void Actor::update(float) {}
 
 //遅延更新
-void Actor::late_update(float) {}
+void Actor::lateUpdate(float) {}
 
 //描画
 void Actor::draw() const {}
@@ -69,9 +69,19 @@ GStransform& Actor::transform() {
 	return transform_;
 }
 
-//移動量を取得
-GSvector3 Actor::velocity() const {
+// 移動量の取得
+const GSvector3& Actor::velocity() const {
 	return velocity_;
+}
+
+GSvector3& Actor::velocity()
+{
+	return velocity_;
+}
+
+void Actor::velocity(const GSvector3& vec)
+{
+	velocity_ = vec;
 }
 
 //衝突判定データを取得

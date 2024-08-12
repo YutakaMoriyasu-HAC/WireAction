@@ -43,49 +43,41 @@ void World::draw() const {
 
 //消去
 void World::clear() {
-	//アクターを消去
+	//アクターの消去
 	actors_.clear();
-	//カメラを消去
-	delete camera_;
-	camera_ = nullptr;
-	//ライトを消去
-	delete light_;
-	light_ = nullptr;
-	//フィールドを消去
-	delete field_;
-	field_ = nullptr;
+	// カメラを消去
+	camera_.reset();
+	// ライトを消去
+	light_.reset();
 }
 
 //カメラの追加
-void World::add_camera(Actor* camera) {
-	delete camera_; //現在のカメラを削除
+void World::add_camera(std::shared_ptr<Actor> camera) {
 	camera_ = camera;
 }
 
 //ライトの追加
-void World::add_light(Actor* light) {
-	delete light_; //現在のライトを削除
+void World::add_light(std::shared_ptr<Actor> light) {
 	light_ = light;
 }
 
 //フィールドの追加
-void World::add_field(Field* field) {
-	delete field_; //現在のフィールドを削除
+void World::add_field(std::shared_ptr<Field> field) {
 	field_ = field;
 }
 
 //アクターの追加
-void World::add_actor(Actor* actor) {
+void World::add_actor(std::shared_ptr<Actor> actor) {
 	actors_.add(actor);
 }
 
 //アクターの検索
-Actor* World::find_actor(const std::string& name)const {
+std::shared_ptr<Actor> World::find_actor(const std::string& name)const {
 	return actors_.find(name);
 }
 
 //指定したタグ名を持つアクターの検索
-std::vector<Actor*>World::find_actor_with_tag(const std::string& tag) const {
+std::vector<std::shared_ptr<Actor>>World::find_actor_with_tag(const std::string& tag) const {
 	return actors_.find_with_tag(tag);
 }
 
@@ -105,16 +97,16 @@ void World::send_message(const std::string& message, void* param) {
 }
 
 //カメラの取得
-Actor* World::camera() {
+std::shared_ptr<Actor> World::camera() {
 	return camera_;
 }
 
 //ライトの取得
-Actor* World::light() {
+std::shared_ptr<Actor> World::light() {
 	return light_;
 }
 
 //フィールドの取得
-Field* World::field() {
+std::shared_ptr<Field> World::field() {
 	return field_;
 }

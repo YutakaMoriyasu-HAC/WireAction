@@ -1,6 +1,7 @@
 #include "GamePlayScene.h"
 #include "app/Field/Field.h"
 #include "app/Actors/CameraTps/CameraRotateAround.h"
+#include "app/Actors/CameraTps/CameraTps.h"
 #include "app/Light/Light.h"
 #include "app/Actors/Player/Player.h"
 #include "app/NameList/Assets.h"
@@ -21,14 +22,17 @@ void GamePlayScene::start() {
 	gsLoadOctree(Octree_Collider, "resource/Assets/Octree/stage_collider.oct");
 
 	//フィールドクラスの追加
-	world_.add_field(new Field{ Octree_Stage, Octree_Collider, Mesh_Skybox });
+	world_.add_field(std::make_shared<Field>(Octree_Stage, Octree_Collider, Mesh_Skybox ));
 	//カメラクラスの追加
-	world_.add_camera(new CameraRotateAround{ &world_, GSvector3{ 0.0f, 3.2f, -4.8f }, GSvector3{ 0.0f, 1.92f, 0.0f } });
+	//world_.add_camera(new CameraRotateAround{ &world_, GSvector3{ 0.0f, 3.2f, -4.8f }, GSvector3{ 0.0f, 1.92f, 0.0f } });
+
+	//カメラクラスの追加
+	world_.add_camera(std::make_shared<CameraTps>(&world_, GSvector3(8.0f, 3.0f, 0.0f), GSvector3(-5.0f, 0.0f, 0.0f)));
 	//ライトクラスの追加
-	world_.add_light(new Light{ &world_ });
+	world_.add_light(std::make_shared<Light>(&world_));
 
 	//プレイヤーの追加
-	world_.add_actor(new Player{ &world_, GSvector3{ 0.0f, 0.125f, 0.0f } });
+	world_.add_actor(std::make_shared<Player>(&world_, GSvector3(0.0f, 0.125f, 0.0f)));
 	
 
 }

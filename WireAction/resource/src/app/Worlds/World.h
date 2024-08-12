@@ -18,18 +18,18 @@ public:
 	//消去
 	void clear();
 	//カメラの追加
-	void add_camera(Actor* camera);
+	void add_camera(std::shared_ptr<Actor> camera);
 	//ライトの追加
-	void add_light(Actor* light);
+	void add_light(std::shared_ptr<Actor> light);
 	//フィールドの追加
-	void add_field(Field* field);
+	void add_field(std::shared_ptr<Field> field);
 
 	//アクターを追加
-	virtual void add_actor(Actor* actor) override;
+	virtual void add_actor(std::shared_ptr<Actor> actor) override;
 	//アクターの検索
-	virtual Actor* find_actor(const std::string& name) const override;
+	virtual std::shared_ptr<Actor> find_actor(const std::string& name) const override;
 	//指定したタグ名を持つアクターの検索
-	virtual std::vector<Actor*> find_actor_with_tag(const std::string& tag) const override;
+	virtual std::vector<std::shared_ptr<Actor>> find_actor_with_tag(const std::string& tag) const override;
 	//アクター数を返す
 	virtual int count_actor() const override;
 	//指定したタグ名を持つアクター数を返す
@@ -38,11 +38,11 @@ public:
 	virtual void send_message(const std::string& message, void* param = nullptr) override;
 
 	//カメラの取得
-	virtual Actor* camera() override;
+	virtual std::shared_ptr<Actor> camera() override;
 	//ライトの取得
-	virtual Actor* light() override;
+	virtual std::shared_ptr<Actor> light() override;
 	//フィールドの取得
-	virtual Field* field() override;
+	virtual std::shared_ptr<Field> field() override;
 
 	//コピー禁止
 	World(const World& other) = delete;
@@ -52,11 +52,11 @@ private:
 	//アクターマネージャー
 	ActorManager actors_;
 	//ライト
-	Actor*		 light_{ nullptr };
+	std::shared_ptr<Actor>		 light_{ nullptr };
 	//カメラ
-	Actor*		 camera_{ nullptr };
+	std::shared_ptr<Actor>		 camera_{ nullptr };
 	//フィールド
-	Field*		 field_{ nullptr };
+	std::shared_ptr<Field>		 field_{ nullptr };
 };
 
 #endif

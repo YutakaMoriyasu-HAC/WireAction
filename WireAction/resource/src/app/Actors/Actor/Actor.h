@@ -18,7 +18,7 @@ public:
 	//更新
 	virtual void update(float delta_time);
 	//遅延更新
-	virtual void late_update(float delta_time);
+	virtual void lateUpdate(float delta_time);
 	//描画
 	virtual void draw() const;
 	//半透明の描画
@@ -46,7 +46,10 @@ public:
 	//トランスフォームを取得
 	GStransform& transform();
 	//移動量を取得
-	GSvector3 velocity() const;
+	const GSvector3& velocity() const;
+	GSvector3& velocity();
+	//移動量を設定
+	void velocity(const GSvector3& vec);
 	//衝突判定データを取得
 	BoundingSphere collider() const;
 

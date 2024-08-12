@@ -7,7 +7,7 @@ ActorManager::~ActorManager() {
 }
 
 //アクターの追加
-void ActorManager::add(Actor* actor) {
+void ActorManager::add(std::shared_ptr<Actor> actor) {
 	actors_.push_back(actor);
 }
 
@@ -21,7 +21,7 @@ void ActorManager::update(float delta_time) {
 //アクターの遅延更新
 void ActorManager::late_update(float delta_time) {
 	for (auto actor : actors_) {
-		actor->late_update(delta_time);
+		actor->lateUpdate(delta_time);
 	}
 }
 
@@ -59,7 +59,6 @@ void ActorManager::collide() {
 void ActorManager::remove() {
 	for (auto i = actors_.begin(); i != actors_.end();) {
 		if ((*i)->is_dead()) {
-			delete* i;
 			i = actors_.erase(i);
 		}
 		else {
@@ -69,7 +68,7 @@ void ActorManager::remove() {
 }
 
 //アクターの検索
-Actor* ActorManager::find(const std::string& name) const {
+std::shared_ptr<Actor> ActorManager::find(const std::string& name) const {
 	for (auto actor : actors_) {
 		if (actor->name() == name) {
 			return actor;
@@ -79,8 +78,8 @@ Actor* ActorManager::find(const std::string& name) const {
 }
 
 //指定したタグ名を持つアクターの検索
-std::vector<Actor*> ActorManager::find_with_tag(const std::string& tag) const {
-	std::vector<Actor*>result;
+std::vector<std::shared_ptr<Actor>> ActorManager::find_with_tag(const std::string& tag) const {
+	std::vector<std::shared_ptr<Actor>>result;
 	for (auto actor : actors_) {
 		if (actor->tag() == tag) {
 			result.push_back(actor);
@@ -112,10 +111,9 @@ void ActorManager::send_message(const std::string& message, void* param) {
 	}
 }
 
-//消去
+// 消去
 void ActorManager::clear() {
-	for (auto actor : actors_) {
-		delete actor;
-	}
 	actors_.clear();
+	// メモリの開放
+	std::list<std::shared_ptr<Actor>>().swap(actors_);
 }

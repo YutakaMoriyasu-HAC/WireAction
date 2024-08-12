@@ -25,9 +25,11 @@ public:
 	//現在のモーションの再生時間を設定
 	void motion_time(float time);
 	//モーションの終了時間を取得
-	float motion_end_time() const;
+	float motionEndTime() const;
 	//ボーンのワールド変換行列を取得
 	GSmatrix4 bone_matrices(int bone_no) const;
+
+	const float DefaultLerpTime{ 0.5f };
 
 private:
 	//アセットID
