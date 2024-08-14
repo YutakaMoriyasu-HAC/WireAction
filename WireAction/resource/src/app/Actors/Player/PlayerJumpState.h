@@ -50,12 +50,9 @@ private:
 	//現在の移動方向から入力方向までのベクトル
 	GSvector3 velocityToInputVector_{ 0.0f,0.0f,0.0f };
 
-	enum SpeedState {
-		Stop,
-		SpeedUp,
-		SpeedDown,
-	};
-	SpeedState SState_{ Stop };
+	int jumpNum_{ 1 }; //残りジャンプ回数
+
+	
 
 
 	GSvector3 my_Input_Direction_{ 0,0,0 };

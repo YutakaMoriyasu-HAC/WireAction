@@ -34,13 +34,9 @@ void PlayerJumpState::init()
 	stateStartSpeed = sqrtf((velocity_.x * velocity_.x) + (velocity_.z * velocity_.z));
 	stateStartVec = velocity_;
 
-	//入力があれば加速、無ければ止まらない
-	if (parent_->input_ != GSvector3::zero()) {
-		SState_ = SpeedUp;
-	}
-	else {
-		SState_ = SpeedDown;
-	}
+	//ジャンプ回数リセット
+	jumpNum_ = 1;
+
 
 }
 // 終了
@@ -50,14 +46,24 @@ void PlayerJumpState::final()
 // 更新
 void PlayerJumpState::update()
 {
+	//空中ジャンプ
+	if (InputManager::IsAButtonTrigger() && jumpNum_ >= 1) {
+		parent_->velocity().y = 0.18f;
+		cameraLookPoint_.y = (cameraLookPoint_.y+parent_->GetPosition().y)/2;
+		jumpNum_ -= 1;
+	}
+
 	//速度継承する
 	velocity_ = parent_->velocity();
 	moveSpeed_ = sqrtf((velocity_.x * velocity_.x) + (velocity_.z * velocity_.z));
 
+	//着地したら終了
 	if (parent_->isGround()) {
 		parent_->changeState(PlayerStateList::State_Walk);
 		return;
 	}
+
+	
 
 	//座標取得
 	position_ = parent_->GetPosition();
