@@ -7,11 +7,9 @@
 
 
 // 移動速度
-const float MIN_SPEED{ 0.005f };
-const float ACCELERATION{ 0.003f };
-const float MAX_SPEED{ 0.15f };
-const float ACCELERATION2{ 0.1f };
-const float MAX_SPEED2{ 0.25f };
+const float MIN_SPEED{ 0.008f };
+const float ACCELERATION{ 0.001f };
+const float MAX_SPEED{ 0.05f };
 
 // << プレイヤーの移動 >>
 
@@ -28,6 +26,22 @@ void PlayerJumpState::init()
 	//カメラ座標
 	cameraLookPoint_ = parent_->getCameraLookPoint();
 
+	//速度継承
+	velocity_ = parent_->velocity();
+
+	//このステートが始まった時の速度をここで求めておく
+	//通常の歩行よりも速いスピードのまま歩き状態になった時、その速度を維持するということ
+	stateStartSpeed = sqrtf((velocity_.x * velocity_.x) + (velocity_.z * velocity_.z));
+	stateStartVec = velocity_;
+
+	//入力があれば加速、無ければ止まらない
+	if (parent_->input_ != GSvector3::zero()) {
+		SState_ = SpeedUp;
+	}
+	else {
+		SState_ = SpeedDown;
+	}
+
 }
 // 終了
 void PlayerJumpState::final()
@@ -36,8 +50,13 @@ void PlayerJumpState::final()
 // 更新
 void PlayerJumpState::update()
 {
+	//速度継承する
+	velocity_ = parent_->velocity();
+	moveSpeed_ = sqrtf((velocity_.x * velocity_.x) + (velocity_.z * velocity_.z));
+
 	if (parent_->isGround()) {
 		parent_->changeState(PlayerStateList::State_Walk);
+		return;
 	}
 
 	//座標取得
@@ -46,23 +65,49 @@ void PlayerJumpState::update()
 	//向いてる方向
 	my_Input_Direction_ = parent_->GetInput();
 
-	// キーの入力から移動ベクトルを取得
-	GSvector3 velocity = parent_->velocity();
+	//スティック入力があった時、現在のベクトルからスティック入力方向までのベクトルを求める
+	if (parent_->input_ != GSvector3::zero()) {
 
+		//my_Input_Direction_の角度
+		float inputAngle = atanf(my_Input_Direction_.z / my_Input_Direction_.x)*(180/math::PI);
+		if (inputAngle > 360)inputAngle -= 360;
+		if (inputAngle <0)inputAngle += 360;
+
+		//ベクトル角度
+		float velocityAngle = atanf(velocity_.z / velocity_.x) * (180 / math::PI);
+		if (velocityAngle > 360)velocityAngle -= 360;
+		if (velocityAngle < 0)velocityAngle += 360;
+
+
+
+		//スティック角度が元の角度より60度以内だったら速度継承
+		if ((ABS(velocityAngle - inputAngle) < 60 || ABS(velocityAngle - inputAngle) >300) && stateStartSpeed!=0) {
+			velocityToInputVector_ = (my_Input_Direction_ * stateStartSpeed) - velocity_;
+		}
+		else {
+			velocityToInputVector_ = (my_Input_Direction_ * MAX_SPEED) - velocity_;
+		}
+
+		velocity_.x += velocityToInputVector_.x / 15.0f;
+		velocity_.z += velocityToInputVector_.z / 15.0f;
+	}
 	
+	
+
+
 	//いろいろ変えちゃった回転方向を親に返す
 	parent_->SetInputDirection(my_Input_Direction_);
 
 	// モーションの変更
 	// 移動量のxy成分だけ更新
-	parent_->velocity().x = velocity.x;
-	parent_->velocity().z = velocity.z;
+	parent_->velocity().x = velocity_.x;
+	parent_->velocity().z = velocity_.z;
 
-	cameraLookPoint_.x = parent_->GetPosition().x + velocity.x;
-	cameraLookPoint_.z = parent_->GetPosition().z + velocity.z;
+	cameraLookPoint_.x = parent_->GetPosition().x + velocity_.x;
+	cameraLookPoint_.z = parent_->GetPosition().z + velocity_.z;
 
 	//移動
-	parent_->SetPosition(parent_->GetPosition() + velocity);
+	parent_->SetPosition(parent_->GetPosition() + velocity_);
 
 	//プレイヤーがジャンプ前の座標よりも下に落ちてたら注視点も下げる
 	if (parent_->GetPosition().y < cameraLookPoint_.y) {

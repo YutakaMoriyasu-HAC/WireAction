@@ -9,6 +9,8 @@ World::~World() {
 
 //更新
 void World::update(float delta_time) {
+	
+
 	//フィールドの更新
 	field_->update(delta_time);
 	//アクターの更新
@@ -27,10 +29,15 @@ void World::update(float delta_time) {
 
 //描画
 void World::draw() const {
+	
 	//カメラの設定
 	camera_->draw();
 	//ライトの設定
 	light_->draw();
+
+	// シャドウマップの描画
+	gsDrawShadowMap(World::shadowMapCallback, (void*)this);
+
 	//フィールドの描画
 	field_->draw();
 	//アクターの描画
@@ -64,6 +71,15 @@ void World::add_light(std::shared_ptr<Actor> light) {
 //フィールドの追加
 void World::add_field(std::shared_ptr<Field> field) {
 	field_ = field;
+}
+
+// シャドウマップの描画用の関数
+void World::shadowMapCallback(void* param, const GSmatrix4*, const GSmatrix4*)
+{
+	World* self = (World*)param;
+	// シャドウマップにアクターを描画
+	self->actors_.draw();
+
 }
 
 //アクターの追加

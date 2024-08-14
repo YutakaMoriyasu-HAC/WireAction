@@ -39,10 +39,14 @@ private:
 	IWorld* world_;
 	GSvector3 position_;
 
-	//移動速度
+	//加速度
 	float moveSpeed_{ 0.5f };
 
+	//速度
+	GSvector3 velocity_{0.0f,0.0f,0.0f};
 
+	//このステートが始まった時のスピ―ド、通称SSS
+	float stateStartSpeed{ 0.0f };
 
 	enum SpeedState {
 		Stop,

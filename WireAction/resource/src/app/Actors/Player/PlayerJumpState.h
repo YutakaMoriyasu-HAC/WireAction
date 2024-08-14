@@ -39,8 +39,23 @@ private:
 	//移動速度
 	float moveSpeed_{ 0.5f };
 
+	//速度
+	GSvector3 velocity_{ 0.0f,0.0f,0.0f };
 
+	//このステートが始まった時のスピ―ド、通称SSS
+	float stateStartSpeed{ 0.0f };
+	//このステートが始まった時のベクトル
+	GSvector3 stateStartVec{ 0.0f,0.0f,0.0f };
 
+	//現在の移動方向から入力方向までのベクトル
+	GSvector3 velocityToInputVector_{ 0.0f,0.0f,0.0f };
+
+	enum SpeedState {
+		Stop,
+		SpeedUp,
+		SpeedDown,
+	};
+	SpeedState SState_{ Stop };
 
 
 	GSvector3 my_Input_Direction_{ 0,0,0 };

@@ -21,7 +21,7 @@ private:
 
 	bool startFlag_{ false };
 
-
+	int cameraLevel_{ 0 };
 
 	//前のフレームの注視点
 	GSvector3 prevPlayerLookPos_{ 0,3,5 };

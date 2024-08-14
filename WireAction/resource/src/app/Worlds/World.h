@@ -3,6 +3,7 @@
 
 #include "app/Worlds/IWorld.h"
 #include "app/Actors/ActorManager/ActorManager.h"
+#include <gslib.h>
 
 //ワールドクラス
 class World : public IWorld {
@@ -23,6 +24,8 @@ public:
 	void add_light(std::shared_ptr<Actor> light);
 	//フィールドの追加
 	void add_field(std::shared_ptr<Field> field);
+	// シャドウマップの描画用の関数
+	static void shadowMapCallback(void* param, const GSmatrix4*, const GSmatrix4*);
 
 	//アクターを追加
 	virtual void add_actor(std::shared_ptr<Actor> actor) override;

@@ -9,7 +9,7 @@
 
 //カメラの注視点の補正値
 const GSvector3 ReferencePointOffset{ 0.0f,1.7f,0.0f };
-const float CameraDistance_{ 20.0f };
+float cameraDistance_{ 15.0f };
 
 CameraTps::CameraTps(IWorld* world, const GSvector3& position, const GSvector3& at) :
 	Actor()
@@ -64,7 +64,18 @@ void CameraTps::update(float delta_time)
 	}
 
 	//入力
-	cameraAngle_ += InputManager::CameraRotation() * InputManager::GetCameraSensitivity() * delta_time;
+	cameraAngle_.x += InputManager::CameraRotation().x * InputManager::GetCameraSensitivity() * delta_time;
+	if (InputManager::CameraRotation().y == -1 && cameraLevel_ == 0) {
+		cameraAngle_.y = 30;
+		cameraDistance_ = 20.0f;
+		cameraLevel_ = 1;
+	}
+	if (InputManager::CameraRotation().y == 1 && cameraLevel_ == 1) {
+		cameraAngle_.y = 20;
+		cameraDistance_ = 12.0f;
+		cameraLevel_ = 0;
+	}
+
 	//cameraAngle_.y = 25;
 	if (cameraAngle_.x < 0) cameraAngle_.x += 360;
 	if (cameraAngle_.x > 360) cameraAngle_.x -= 360;
@@ -75,16 +86,16 @@ void CameraTps::update(float delta_time)
 	GSvector3 position;
 
 	//カメラのy座標決定
-	position.y = smoothPlayerLookPos_.y + sinf(cameraAngleE_.y) * CameraDistance_;
-	float xzPos = cosf(cameraAngleE_.y) * CameraDistance_;
+	position.y = smoothPlayerLookPos_.y + sinf(cameraAngleE_.y) * cameraDistance_;
+	float xzPos = cosf(cameraAngleE_.y) * cameraDistance_;
 
 	//カメラを上に向けたときの位置調整
 	if (position.y < smoothPlayerLookPos_.y) {
-		float bairitsu = (sinf(cameraAngleE_.y) * CameraDistance_) / -ReferencePointOffset.y;
+		float bairitsu = (sinf(cameraAngleE_.y) * cameraDistance_) / -ReferencePointOffset.y;
 		position.y = smoothPlayerLookPos_.y;
-		xzPos = cosf(cameraAngleE_.y) * CameraDistance_ / bairitsu;
-		if (xzPos >= CameraDistance_) {
-			xzPos = cosf(cameraAngleE_.y) * CameraDistance_;
+		xzPos = cosf(cameraAngleE_.y) * cameraDistance_ / bairitsu;
+		if (xzPos >= cameraDistance_) {
+			xzPos = cosf(cameraAngleE_.y) * cameraDistance_;
 		}
 	}
 

@@ -43,12 +43,14 @@ const GSvector2 InputManager::CameraRotation()
     // コントローラー
     gsXBoxPadGetRightAxis(PAD_NUM, &direct);
     direct.x *= isRightAxisReversX_ ? -1 : 1;
-    direct.y *= isRightAxisReversY_ ? 1 : -1;
+    if (ABS(direct.y) >= 0.9f) {
+        direct.y = direct.y < 0 ? -1 : 1;
+    }
     // パッドの入力があれば返却
     if (direct.length() != 0) return direct;
     // キー入力
-    if (gsGetKeyState(GKEY_UPARROW)) direct.y = 1;
-    else if (gsGetKeyState(GKEY_DOWNARROW)) direct.y = -1;
+    if (gsGetKeyTrigger(GKEY_UPARROW)) direct.y = 1;
+    else if (gsGetKeyTrigger(GKEY_DOWNARROW)) direct.y = -1;
     if (gsGetKeyState(GKEY_LEFTARROW)) direct.x = -1;
     else if (gsGetKeyState(GKEY_RIGHTARROW)) direct.x = 1;
     return direct;

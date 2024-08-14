@@ -19,7 +19,7 @@ const float PlayerRadius{ 0.5f };
 //足元のオフセット
 const float FootOffset{ 0.1f };
 //重力値
-const float Gravity{ -0.016f };
+const float Gravity{ -0.012f }; //-0.016
 
 //コンストラクタ
 Player::Player(IWorld* world, const GSvector3& position) :

@@ -30,12 +30,19 @@ void PlayerMoveState::init()
 	//カメラ座標
 	cameraLookPoint_ = parent_->getCameraLookPoint();
 
+	//速度継承
+	velocity_= parent_->velocity();
+
+	//このステートが始まった時の速度をここで求めておく
+	//通常の歩行よりも速いスピードのまま歩き状態になった時、その速度を維持するということ
+	stateStartSpeed = sqrtf((velocity_.x * velocity_.x) + (velocity_.z * velocity_.z));
+
 	//入力があれば加速、無ければ止まる
 	if (parent_->input_ != GSvector3::zero()) {
 		SState_ = SpeedUp;
 	}
 	else {
-		SState_ = Stop;
+		SState_ = SpeedDown;
 	}
 
 }
@@ -46,10 +53,14 @@ void PlayerMoveState::final()
 // 更新
 void PlayerMoveState::update()
 {
+	//速度継承する
+	velocity_ = parent_->velocity();
+	moveSpeed_ = sqrtf((velocity_.x * velocity_.x) + (velocity_.z * velocity_.z));
+
 	//ジャンプボタンが押されたらステート変更
 	if (InputManager::IsAButtonTrigger()) {
 		parent_->changeState(PlayerStateList::State_Jump);
-		parent_->velocity().y = 0.25f;
+		parent_->velocity().y = 0.23f;
 		parent_->setCameraLookPoint(cameraLookPoint_);
 		return;
 	}
@@ -63,17 +74,15 @@ void PlayerMoveState::update()
 
 	//座標取得
 	position_ = parent_->GetPosition();
-
-	//向いてる方向
+	//向いてる方向取得
 	my_Input_Direction_ = parent_->GetInput();
 
-	// キーの入力から移動ベクトルを取得
-	GSvector3 velocity = my_Input_Direction_ * moveSpeed_;
-	
-	//速度に応じてさらに状態分け
+	//移動速度の計算
+	//速度に応じてさらに状態分けする
 	switch (SState_) {
 	case Stop:
 		moveSpeed_ = 0;
+		
 		//スティックが倒された瞬間
 		if (parent_->input2_ == GSvector3::zero() && parent_->input_ != GSvector3::zero()) {
 			moveSpeed_ = MIN_SPEED;
@@ -84,13 +93,16 @@ void PlayerMoveState::update()
 
 	case SpeedUp:
 		// 移動しているか
-		if (velocity.length() != 0.0f) {
+		if (velocity_.length() != 0.0f) {
 
 			changeAngle();
 		}
 
 		//速度調整
-		if (moveSpeed_ + ACCELERATION < MAX_SPEED) {
+		if (stateStartSpeed > MAX_SPEED) {
+			moveSpeed_ = stateStartSpeed;
+		}
+		else if (moveSpeed_ + ACCELERATION < MAX_SPEED) {
 			moveSpeed_ += ACCELERATION;
 		}
 		else {
@@ -112,7 +124,7 @@ void PlayerMoveState::update()
 
 	case SpeedDown:
 		if (moveSpeed_ - ACCELERATION*4 > 0) {
-			moveSpeed_ -= ACCELERATION * 4;
+			moveSpeed_ -= ACCELERATION * 2;
 		}
 		else {
 			moveSpeed_ = 0;
@@ -126,18 +138,23 @@ void PlayerMoveState::update()
 		}
 		break;
 	}
+
+	//向いてる方向に速度をかけて加速度にする
+	velocity_ = my_Input_Direction_ * moveSpeed_;
+	
+
 	//いろいろ変えちゃった回転方向を親に返す
 	parent_->SetInputDirection(my_Input_Direction_);
 
 	// モーションの変更
 	// 移動量のxy成分だけ更新
-	parent_->velocity().x = velocity.x;
-	parent_->velocity().z = velocity.z;
+	parent_->velocity().x = velocity_.x;
+	parent_->velocity().z = velocity_.z;
 
-	cameraLookPoint_ = parent_->GetPosition() + velocity;
+	cameraLookPoint_ = parent_->GetPosition() + velocity_;
 
 	//移動
-	parent_->SetPosition(parent_->GetPosition() + velocity);
+	parent_->SetPosition(parent_->GetPosition() + velocity_);
 
 	
 	//注視点設定
