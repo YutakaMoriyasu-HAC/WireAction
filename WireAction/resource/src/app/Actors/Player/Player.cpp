@@ -19,12 +19,12 @@ const float PlayerRadius{ 0.5f };
 //足元のオフセット
 const float FootOffset{ 0.1f };
 //重力値
-const float Gravity{ -0.012f }; //-0.016
+const float Gravity{ -0.008f }; //-0.016
 
 //コンストラクタ
 Player::Player(IWorld* world, const GSvector3& position) :
-	mesh_{ Mesh_Player, MotionIdle, true },
-	motion_{ MotionIdle },
+	mesh_{ Mesh_Player, 0, true },
+	motion_{ Motion_Idle },
 	motion_loop_{ true },
 	state_timer_{ 0.0f } {
 	//ワールドを設定
@@ -50,7 +50,7 @@ void Player::update(float delta_time) {
 	ControllerUpdate();
 
 	//重力値を更新
-	velocity_.y += Gravity * delta_time;
+	velocity_.y += Gravity*delta_time;
 	//重力を加える
 	transform_.translate(0.0f, velocity_.y, 0.0f);
 	//フィールドとの衝突判定
@@ -75,7 +75,7 @@ void Player::draw() const {
 	//メッシュを描画
 	mesh_.draw();
 	//衝突判定球のデバッグ表示
-	collider().draw();
+	//collider().draw();
 }
 
 //衝突リアクション
@@ -139,7 +139,10 @@ void Player::SetPosition(GSvector3 pos)
 	transform_.position(pos);
 }
 
-
+//再生中のアニメを返す
+const int Player::GetMotionState() const {
+	return motion_;
+}
 
 
 

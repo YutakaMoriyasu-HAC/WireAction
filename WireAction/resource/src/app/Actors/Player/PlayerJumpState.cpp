@@ -35,7 +35,10 @@ void PlayerJumpState::init()
 	stateStartVec = velocity_;
 
 	//ジャンプ回数リセット
-	jumpNum_ = 1;
+	jumpNum_ = 0;
+
+	//ボタンを押している状態
+	buttonReleaseFlag_ = false;
 
 
 }
@@ -48,9 +51,16 @@ void PlayerJumpState::update()
 {
 	//空中ジャンプ
 	if (InputManager::IsAButtonTrigger() && jumpNum_ >= 1) {
-		parent_->velocity().y = 0.18f;
+		parent_->velocity().y = 0.15f;
 		cameraLookPoint_.y = (cameraLookPoint_.y+parent_->GetPosition().y)/2;
 		jumpNum_ -= 1;
+		parent_->ChangeMotionS(Motion_Jump, false); //モーション変更
+		buttonReleaseFlag_ = false;
+	}
+
+	//ボタンを離した瞬間
+	if (!InputManager::IsAButtonState() && !buttonReleaseFlag_) {
+		buttonReleaseFlag_ = true;
 	}
 
 	//速度継承する
@@ -60,7 +70,17 @@ void PlayerJumpState::update()
 	//着地したら終了
 	if (parent_->isGround()) {
 		parent_->changeState(PlayerStateList::State_Walk);
+		parent_->ChangeMotionS(Motion_Idle, false); //モーション変更
 		return;
+	}
+
+	//上昇中かつボタン離していたら減衰
+	//すぐ減衰すごく減衰
+	if (buttonReleaseFlag_ && velocity_.y > 0) {
+		velocity_.y -= ACCELERATION*100;
+		if (velocity_.y < 0) {
+			velocity_.y = 0;
+		}
 	}
 
 	

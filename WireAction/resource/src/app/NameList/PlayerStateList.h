@@ -9,14 +9,32 @@ enum PlayerStateList {
 };
 
 enum PlayerMotionList {
-	MotionIdle = 1,     // アイドル
-	MotionForwardWalk = 2,     // 前進
-	MotionBackwardWalk = 3,     // 後退
-	MotionLeftWalk = 4,     // 左歩き
-	MotionRightWalk = 5,     // 右歩き
-	MotionFire = 11,    // 射撃
-	MotionDamage = 14,    // ダメ―ジ
-	MotionJump = 17     // ジャンプ
+	Motion_Idle,
+	Motion_Walk,
+	Motion_Dash,
+	Motion_Avoid,
+	Motion_LittleDamage,
+	Motion_BigDamage,
+	Motion_Die,
+	Motion_Attack1,
+	Motion_Attack2,
+	Motion_Attack3,
+	Motion_Attack4,
+	Motion_Charge,
+	Motion_ChargeWalk,
+	Motion_RotatingSlash1,
+	Motion_RotatingSlash1End,
+	Motion_Counter,
+	Motion_Chaege2,
+	Motion_RotatingSlash2,
+	Motion_RotatingSlash2End,
+	Motion_RotatingSlash1_0,
+	Motion_Jump,
+	Motion_JumpAttack,
+	Motion_Run,
+	Motion_Attack5,
+	Motion_Attack6,
+	Motion_BackJump
 };
 
 enum PlayerObjectList {

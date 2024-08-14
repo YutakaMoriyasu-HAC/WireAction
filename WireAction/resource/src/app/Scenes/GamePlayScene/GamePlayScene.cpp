@@ -17,7 +17,7 @@ void GamePlayScene::start() {
 	is_end_ = false;
 
 	//プレイヤーのメッシュの読み込み
-	gsLoadSkinMesh(Mesh_Player, "resource/Assets/Player/player.msh");
+	gsLoadSkinMesh(Mesh_Player, "resource/Assets/Player2/player2.msh");
 
 	//スカイドーム用のメッシュを読み込む
 	gsLoadMeshFixed(Mesh_Skybox, "resource/Assets/Skybox/skydome.msh");

@@ -26,6 +26,7 @@ void PlayerMoveState::init()
 {
 	
 	my_Input_Direction_ = parent_->GetInput();
+	parent_->ChangeMotionS(Motion_Idle, true); //モーション変更
 
 	//カメラ座標
 	cameraLookPoint_ = parent_->getCameraLookPoint();
@@ -60,8 +61,9 @@ void PlayerMoveState::update()
 	//ジャンプボタンが押されたらステート変更
 	if (InputManager::IsAButtonTrigger()) {
 		parent_->changeState(PlayerStateList::State_Jump);
-		parent_->velocity().y = 0.23f;
+		parent_->velocity().y = 0.18f;
 		parent_->setCameraLookPoint(cameraLookPoint_);
+		parent_->ChangeMotionS(Motion_Jump, false); //モーション変更
 		return;
 	}
 
@@ -87,6 +89,7 @@ void PlayerMoveState::update()
 		if (parent_->input2_ == GSvector3::zero() && parent_->input_ != GSvector3::zero()) {
 			moveSpeed_ = MIN_SPEED;
 			SState_ = SpeedUp;
+			parent_->ChangeMotionS(Motion_Dash, true, 1.1f); //モーション変更
 			my_Input_Direction_ = parent_->GetInput();
 		}
 		break;
@@ -108,11 +111,16 @@ void PlayerMoveState::update()
 		else {
 			moveSpeed_ = MAX_SPEED;
 		}
+		//もしアニメが変わってなかったら変更
+		if (parent_->GetMotionState() != Motion_Dash) {
+			parent_->ChangeMotionS(Motion_Dash, true, 1.1f); //モーション変更
+		}
 
 		//スティックが離された瞬間
 		if (parent_->input2_ != GSvector3::zero() && parent_->input_ == GSvector3::zero()) {
 			//減速開始
 			SState_ = SpeedDown;
+			parent_->ChangeMotionS(Motion_Walk, true); //モーション変更
 			break;
 		}
 
@@ -129,12 +137,14 @@ void PlayerMoveState::update()
 		else {
 			moveSpeed_ = 0;
 			SState_ = Stop;
+			parent_->ChangeMotionS(Motion_Idle, true); //モーション変更
 		}
 		//スティックが倒された瞬間
 		if (parent_->input2_ == GSvector3::zero() && parent_->input_ != GSvector3::zero()) {
 			moveSpeed_ = MIN_SPEED;
 			SState_ = SpeedUp;
 			my_Input_Direction_ = parent_->GetInput();
+			parent_->ChangeMotionS(Motion_Dash, true, 1.1f); //モーション変更
 		}
 		break;
 	}

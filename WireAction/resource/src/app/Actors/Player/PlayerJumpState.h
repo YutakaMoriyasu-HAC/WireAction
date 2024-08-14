@@ -52,6 +52,8 @@ private:
 
 	int jumpNum_{ 1 }; //残りジャンプ回数
 
+	//ジャンプボタンを離したらtrue
+	bool buttonReleaseFlag_{ false };
 	
 
 

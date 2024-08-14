@@ -30,6 +30,9 @@ public:
 	//他のクラスから受け取った座標を変数にする関数
 	void SetPosition(GSvector3 pos);
 
+	//現在のモーション番号を返す
+	const int GetMotionState() const;
+
 	//最後に向いていた方向を返す
 	const GSvector3 GetInputDirection() const;
 
