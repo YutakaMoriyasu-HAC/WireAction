@@ -54,14 +54,18 @@ void PlayerMoveState::final()
 // 更新
 void PlayerMoveState::update()
 {
+	//まず自然落下
+	parent_->gravityFall(1.0f);
+
 	//速度継承する
 	velocity_ = parent_->velocity();
 	moveSpeed_ = sqrtf((velocity_.x * velocity_.x) + (velocity_.z * velocity_.z));
 
 	//ジャンプボタンが押されたらステート変更
 	if (InputManager::IsAButtonTrigger()) {
+		cameraLookPoint_ = parent_->GetPosition() + velocity_;
 		parent_->changeState(PlayerStateList::State_Jump);
-		parent_->velocity().y = 0.18f;
+		parent_->velocity().y = 0.32f; //0.18
 		parent_->setCameraLookPoint(cameraLookPoint_);
 		parent_->ChangeMotionS(Motion_Jump, false); //モーション変更
 		return;
@@ -164,7 +168,7 @@ void PlayerMoveState::update()
 	cameraLookPoint_ = parent_->GetPosition() + velocity_;
 
 	//移動
-	parent_->SetPosition(parent_->GetPosition() + velocity_);
+	//parent_->SetPosition(parent_->GetPosition() + velocity_);
 
 	
 	//注視点設定

@@ -39,5 +39,5 @@ bool Field::collide(const Ray& ray, float max_distance,
 bool Field::collide(const BoundingSphere& sphere, GSvector3* center) const {
 	return gsOctreeCollisionSphere(
 		gsGetOctree(collider_),
-		&sphere.center, sphere.radius, center) == GS_TRUE;
+		&sphere.center_, sphere.radius_, center) == GS_TRUE;
 }

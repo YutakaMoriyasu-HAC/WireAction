@@ -6,8 +6,11 @@
 #include "app/Namelist/PlayerStateList.h"
 #include "PlayerMoveState.h"
 #include "PlayerJumpState.h"
+#include "PlayerThrowWireState.h"
+#include "PlayerPendulumState.h"
 #include "app/Input/InputManager.h"
-
+#include "app/Actors/WireBeam/WireBeam.h"
+#include <imgui/imgui.h>
 
 
 //移動速度
@@ -17,9 +20,10 @@ const float PlayerHeight{ 1.0f };
 //衝突判定用の半径
 const float PlayerRadius{ 0.5f };
 //足元のオフセット
-const float FootOffset{ 0.1f };
+//const float FootOffset{ 0.1f };
 //重力値
-const float Gravity{ -0.008f }; //-0.016
+const float Gravity{ -0.016f }; //-0.016 //-0.008
+
 
 //コンストラクタ
 Player::Player(IWorld* world, const GSvector3& position) :
@@ -42,6 +46,8 @@ Player::Player(IWorld* world, const GSvector3& position) :
 
 	InitState();
 	lerpSize_ = mesh_.DefaultLerpTime;
+
+	
 }
 
 //更新
@@ -49,12 +55,10 @@ void Player::update(float delta_time) {
 	//入力処理
 	ControllerUpdate();
 
-	//重力値を更新
-	velocity_.y += Gravity*delta_time;
-	//重力を加える
-	transform_.translate(0.0f, velocity_.y, 0.0f);
 	//フィールドとの衝突判定
 	collide_field();
+	
+	
 	//モーションを変更
 	mesh_.change_motion(motion_, motion_loop_);
 	//メッシュのモーションを更新
@@ -63,11 +67,29 @@ void Player::update(float delta_time) {
 	mesh_.transform(transform_.localToWorldMatrix());
 	//ステートマシンを動かす
 	stateMachine_.update();
+
+	footOffset_ = velocity_.y;
+
+	//移動
+	SetPosition(transform_.position() + velocity_);
+	//transform_.translate(velocity_);
 }
 
 void Player::lateUpdate(float delta_time) {
 	//フレームの最後に今のフレームの入力状態を記録
 	input2_ = input_;
+
+	static float velocityAngle{ debugFloat_[0]};
+	static float inputAngle{ debugFloat_[1] };
+	static float hikiAngle{ debugFloat_[2] };
+
+	ImGui::Begin("Debug");
+
+	ImGui::Text("canCollideField:%s", canCollideField_ ? "true" : "false");
+	ImGui::Text("velocityY:%f", velocity_.y);
+
+	ImGui::End();
+	
 }
 
 //描画
@@ -76,6 +98,9 @@ void Player::draw() const {
 	mesh_.draw();
 	//衝突判定球のデバッグ表示
 	//collider().draw();
+
+	
+	
 }
 
 //衝突リアクション
@@ -173,8 +198,8 @@ void Player::collide_field() {
 	//地面との衝突判定(線分との交差判定)
 	GSvector3 position = transform_.position();
 	Line line;
-	line.start	= position + collider_.center;
-	line.end = position + GSvector3{ 0.0f,-FootOffset, 0.0f };
+	line.start	= position + collider_.center_;
+	line.end = position + GSvector3{ 0.0f,footOffset_, 0.0f };
 	GSvector3 intersect;	//地面との交点
 
 	if (world_->field()->collide(line, &intersect)) {
@@ -201,7 +226,7 @@ void Player::collide_actor(Actor& other) {
 	//相手との距離
 	float distance = GSvector3::distance(position, target);
 	//衝突判定球の半径同士を加えた長さを求める
-	float length = collider_.radius + other.collider().radius;
+	float length = collider_.radius_ + other.collider().radius_;
 	//衝突判定球の重なっている長さを求める
 	float overlap = length - distance;
 	//重なっている部分の半分の距離だけ離れる移動量を求める
@@ -215,6 +240,8 @@ void Player::collide_actor(Actor& other) {
 void Player::InitState() {
 	stateMachine_.addState(PlayerStateList::State_Walk, std::make_shared<PlayerMoveState>(this, world_, &stateMachine_));
 	stateMachine_.addState(PlayerStateList::State_Jump, std::make_shared<PlayerJumpState>(this, world_, &stateMachine_));
+	stateMachine_.addState(PlayerStateList::State_ThrowWire, std::make_shared<PlayerThrowWireState>(this, world_, &stateMachine_));
+	stateMachine_.addState(PlayerStateList::State_Pendulum, std::make_shared<PlayerPendulumState>(this, world_, &stateMachine_));
 
 
 	// ステートマシンの初期化
@@ -281,4 +308,34 @@ GSvector3 Player::getCameraLookPoint() {
 //注視点セット
 void Player::setCameraLookPoint(GSvector3 point) {
 	cameraLookPoint_ = point;
+}
+
+void Player::setDebugFloat(int num, float value) {
+	debugFloat_[num] = value;
+}
+
+//召喚
+void Player::spone(int actorListNum) {
+
+	
+
+	switch (actorListNum) {
+	case Actor_WireBeam:
+		world_->add_actor(std::make_shared<WireBeam>(world_, beamDirection_, beamDirection_ - transform_.position(), "Beam", 3.0f /*生存時間 */ , 1.0f, transform_.rotation(),this));
+		break;
+	}
+}
+
+void Player::setBeamDirection(GSvector3 direction) {
+	beamDirection_ = transform_.position() + direction;
+	beamDirection_.y = transform_.position().y + 1.5f;
+}
+
+void Player::gravityFall(float delta_time) {
+	//重力値を更新
+	velocity_.y += Gravity * delta_time;
+}
+
+void Player::setFootOffset(float footOffset) {
+	
 }

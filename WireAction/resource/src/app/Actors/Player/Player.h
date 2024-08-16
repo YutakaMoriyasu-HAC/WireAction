@@ -53,6 +53,19 @@ public:
 	//注視点セット
 	void setCameraLookPoint(GSvector3 point);
 
+	void setDebugFloat(int num, float value);
+
+	//プレイヤークラスから召喚
+	void spone(int actorListNum);
+
+	//ビームを出す方向を決定
+	void setBeamDirection(GSvector3 direction);
+
+	//自然落下
+	void gravityFall(float delta_time);
+
+	//セットふっとオフセットセット
+	void setFootOffset(float footOffset);
 private:
 
 
@@ -66,11 +79,11 @@ private:
 
 	// ステートの初期化
 	void InitState();
-	
+
 
 	//入力情報更新
 	void ControllerUpdate();
-	
+
 	// 移動入力
 	GSvector3 MoveInput();
 
@@ -107,6 +120,15 @@ private:
 
 	//カメラの注視点(ジャンプで変わるため変数にしておく)
 	GSvector3 cameraLookPoint_{ 0,0,0 };
+
+	float debugFloat_[7]{ 0.0f,0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+
+	GSvector3 beamDirection_ { GSvector3::zero()};
+
+	//地面と衝突判定するか
+	bool canCollideField_{ true };
+	
+	float footOffset_{ -1.0f };
 
 };
 

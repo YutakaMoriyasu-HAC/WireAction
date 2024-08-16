@@ -148,11 +148,15 @@
   <ItemGroup>
     <ClCompile Include="resource\src\app\Actors\ActorManager\ActorManager.cpp" />
     <ClCompile Include="resource\src\app\Actors\Actor\Actor.cpp" />
+    <ClCompile Include="resource\src\app\Actors\Ball\Ball.cpp" />
     <ClCompile Include="resource\src\app\Actors\CameraTps\CameraRotateAround.cpp" />
     <ClCompile Include="resource\src\app\Actors\CameraTps\CameraTps.cpp" />
     <ClCompile Include="resource\src\app\Actors\Player\Player.cpp" />
     <ClCompile Include="resource\src\app\Actors\Player\PlayerJumpState.cpp" />
     <ClCompile Include="resource\src\app\Actors\Player\PlayerMoveState.cpp" />
+    <ClCompile Include="resource\src\app\Actors\Player\PlayerPendulumState.cpp" />
+    <ClCompile Include="resource\src\app\Actors\Player\PlayerThrowWireState.cpp" />
+    <ClCompile Include="resource\src\app\Actors\WireBeam\WireBeam.cpp" />
     <ClCompile Include="resource\src\app\AnimatedMesh\AnimatedMesh.cpp" />
     <ClCompile Include="resource\src\app\BoundingSpheres\BoundingSphere.cpp" />
     <ClCompile Include="resource\src\app\Effect\Effect.cpp" />
@@ -176,11 +180,15 @@
   <ItemGroup>
     <ClInclude Include="resource\src\app\Actors\ActorManager\ActorManager.h" />
     <ClInclude Include="resource\src\app\Actors\Actor\Actor.h" />
+    <ClInclude Include="resource\src\app\Actors\Ball\Ball.h" />
     <ClInclude Include="resource\src\app\Actors\CameraTps\CameraRotateAround.h" />
     <ClInclude Include="resource\src\app\Actors\CameraTps\CameraTps.h" />
     <ClInclude Include="resource\src\app\Actors\Player\Player.h" />
     <ClInclude Include="resource\src\app\Actors\Player\PlayerJumpState.h" />
     <ClInclude Include="resource\src\app\Actors\Player\PlayerMoveState.h" />
+    <ClInclude Include="resource\src\app\Actors\Player\PlayerPendulumState.h" />
+    <ClInclude Include="resource\src\app\Actors\Player\PlayerThrowWireState.h" />
+    <ClInclude Include="resource\src\app\Actors\WireBeam\WireBeam.h" />
     <ClInclude Include="resource\src\app\AnimatedMesh\AnimatedMesh.h" />
     <ClInclude Include="resource\src\app\BoundingSpheres\BoundingSphere.h" />
     <ClInclude Include="resource\src\app\Effect\Effect.h" />

@@ -26,7 +26,7 @@ public:
 	void lateDraw()const override;
 
 private:
-	void changeAngle();
+	void changeAngle(float speed);
 
 
 

@@ -117,7 +117,7 @@ void CameraTps::update(float delta_time)
 	}
 
 	//スムースダンプによる滑らかな補間
-	const float SmoothTime{ 12.0f };	//補間フレーム数
+	const float SmoothTime{ 12.0f };	//補間フレーム数12
 	const float MaxSpeed{ 1.0f };		//移動スピードの最大値
 	position = GSvector3::smoothDamp(
 		transform_.position(), position, velocity_,

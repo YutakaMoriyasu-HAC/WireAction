@@ -62,6 +62,8 @@ protected:
 	IWorld*			world_{ nullptr };
 	//タグ名
 	std::string		tag_;
+	// 親、所有者タグ
+	std::string ownerTag_;
 	//名前
 	std::string		name_;
 	//トランスフォーム

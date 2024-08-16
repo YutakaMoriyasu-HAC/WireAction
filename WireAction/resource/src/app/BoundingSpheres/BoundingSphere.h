@@ -16,12 +16,28 @@ public:
 	bool intersects(const BoundingSphere& other) const;
 	//デバッグ表示
 	void draw() const;
+	// 判定が有効か
+	const bool enable() const;
+	// 判定が有効かの変更
+	void enable(const bool flag);
+	// 半径を取得
+	const float radius() const;
+	void setRadius(float radius);
+	// 中心座標
+	const GSvector3& center() const;
+	void setCenter(const GSvector3& center);
+	// デバックフラグを設定
+	void setDebugFrag(bool frag);
 
 public:
 	//半径
-	float		radius{ 0.0f };
+	float		radius_{ 0.0f };
 	//中心座標
-	GSvector3	center{ 0.0f,0.0f,0.0f };
+	GSvector3	center_{ 0.0f,0.0f,0.0f };
+	// フラグ
+	bool		enable_;
+	// デバックフラグ
+	bool		debugFrag_;
 };
 
 #endif

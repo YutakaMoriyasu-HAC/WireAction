@@ -5,6 +5,7 @@
 #include "app/Light/Light.h"
 #include "app/Actors/Player/Player.h"
 #include "app/NameList/Assets.h"
+#include "app/Actors/Ball/Ball.h"
 #include <GSstandard_shader.h>
 
 //開始
@@ -18,6 +19,7 @@ void GamePlayScene::start() {
 
 	//プレイヤーのメッシュの読み込み
 	gsLoadSkinMesh(Mesh_Player, "resource/Assets/Player2/player2.msh");
+	gsLoadMesh(Mesh_Ball, "resource/Assets/Ball/Ball.msh");
 
 	//スカイドーム用のメッシュを読み込む
 	gsLoadMeshFixed(Mesh_Skybox, "resource/Assets/Skybox/skydome.msh");
@@ -34,11 +36,12 @@ void GamePlayScene::start() {
 
 	//フィールドクラスの追加
 	world_.add_field(std::make_shared<Field>(Octree_Stage, Octree_Collider, Mesh_Skybox ));
-	//カメラクラスの追加
-	//world_.add_camera(new CameraRotateAround{ &world_, GSvector3{ 0.0f, 3.2f, -4.8f }, GSvector3{ 0.0f, 1.92f, 0.0f } });
 
 	//プレイヤーの追加
 	world_.add_actor(std::make_shared<Player>(&world_, GSvector3(0.0f, 0.125f, 0.0f)));
+
+	//ballオブジェクトを配置(仮)
+	world_.add_actor(std::make_shared<Ball>(&world_, GSvector3(0.0f, 4.0f, 0.0f)));
 
 	//カメラクラスの追加
 	world_.add_camera(std::make_shared<CameraTps>(&world_, GSvector3(8.0f, 3.0f, 0.0f), GSvector3(-5.0f, 0.0f, 0.0f)));
@@ -75,10 +78,10 @@ void GamePlayScene::start() {
 
 //更新
 void GamePlayScene::update(float delta_time) {
-	//エンターキーでシーン終了としておく
+	/*/エンターキーでシーン終了としておく
 	if (gsGetKeyTrigger(GKEY_RETURN)) {
 		is_end_ = true;
-	}
+	}*/
 	//ワールドの更新
 	world_.update(delta_time);
 }
@@ -106,6 +109,7 @@ void GamePlayScene::end() {
 	//メッシュの削除
 	gsDeleteSkinMesh(Mesh_Player);
 	gsDeleteMesh(Mesh_Skybox);
+	gsDeleteMesh(Mesh_Ball);
 	//オクトリーの削除
 	gsDeleteOctree(Octree_Stage);
 	gsDeleteOctree(Octree_Collider);

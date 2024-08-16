@@ -4,7 +4,8 @@ enum PlayerStateList {
 
 	State_Walk,
 	State_Jump,
-	
+	State_ThrowWire,
+	State_Pendulum,
 
 };
 
@@ -38,5 +39,5 @@ enum PlayerMotionList {
 };
 
 enum PlayerObjectList {
-	
+	Actor_WireBeam,
 };

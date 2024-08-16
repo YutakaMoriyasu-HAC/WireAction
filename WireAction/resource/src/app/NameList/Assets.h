@@ -4,7 +4,8 @@
 //メッシュデータ
 enum {
 	Mesh_Player,		//自機
-	Mesh_Skybox			//スカイボックス
+	Mesh_Skybox,			//スカイボックス
+	Mesh_Ball,
 };
 
 //テクスチャ
