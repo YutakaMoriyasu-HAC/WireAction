@@ -41,7 +41,9 @@ void GamePlayScene::start() {
 	world_.add_actor(std::make_shared<Player>(&world_, GSvector3(0.0f, 0.125f, 0.0f)));
 
 	//ballオブジェクトを配置(仮)
-	world_.add_actor(std::make_shared<Ball>(&world_, GSvector3(0.0f, 4.0f, 0.0f)));
+	world_.add_actor(std::make_shared<Ball>(&world_, GSvector3(0.0f, 6.0f, 0.0f)));
+	world_.add_actor(std::make_shared<Ball>(&world_, GSvector3(-6.0f, 6.0f, -6.0f)));
+	world_.add_actor(std::make_shared<Ball>(&world_, GSvector3(10.0f, 12.0f, -7.0f)));
 
 	//カメラクラスの追加
 	world_.add_camera(std::make_shared<CameraTps>(&world_, GSvector3(8.0f, 3.0f, 0.0f), GSvector3(-5.0f, 0.0f, 0.0f)));

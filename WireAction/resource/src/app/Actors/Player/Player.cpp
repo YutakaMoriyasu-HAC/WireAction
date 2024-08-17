@@ -85,8 +85,11 @@ void Player::lateUpdate(float delta_time) {
 
 	ImGui::Begin("Debug");
 
-	ImGui::Text("canCollideField:%s", canCollideField_ ? "true" : "false");
+	//ImGui::Text("canCollideField:%s", canCollideField_ ? "true" : "false");
 	ImGui::Text("velocityY:%f", velocity_.y);
+	ImGui::Text("centerPendulumX:%f", centerPendulum_.x);
+	ImGui::Text("playerx:%f", transform_.position().x);
+	ImGui::Text("playerSpeed:%f", debugMoveSpeed_);
 
 	ImGui::End();
 	
@@ -202,7 +205,7 @@ void Player::collide_field() {
 	line.end = position + GSvector3{ 0.0f,footOffset_, 0.0f };
 	GSvector3 intersect;	//地面との交点
 
-	if (world_->field()->collide(line, &intersect)) {
+	if (world_->field()->collide(line, &intersect) && footOffset_<0) {
 		//交点の位置からy座標のみ補正する
 		position.y = intersect.y;
 		//座標を変更する
@@ -336,6 +339,14 @@ void Player::gravityFall(float delta_time) {
 	velocity_.y += Gravity * delta_time;
 }
 
-void Player::setFootOffset(float footOffset) {
-	
+void Player::setCenterPendulum(GSvector3 center) {
+	centerPendulum_ = center;
+}
+
+GSvector3 Player::getCenterPendulum() {
+	return centerPendulum_;
+}
+
+void Player::setDebugMoveSpeed(float speed) {
+	debugMoveSpeed_ = speed;
 }

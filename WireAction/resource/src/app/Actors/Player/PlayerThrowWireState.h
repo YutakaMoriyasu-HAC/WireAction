@@ -38,10 +38,14 @@ private:
 	GSvector3 position_;
 
 
-
+	//カメラの注視点(ジャンプで変わるため変数にしておく)
+	GSvector3 cameraLookPoint_{ 0,0,0 };
 
 
 	GSvector3 my_Input_Direction_{ 0,0,0 };
+
+	//速度
+	GSvector3 velocity_{ 0.0f,0.0f,0.0f };
 
 
 };

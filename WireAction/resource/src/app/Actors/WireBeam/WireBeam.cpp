@@ -56,6 +56,7 @@ void WireBeam::react(Actor& other)
 {
 
 	if (other.name() == "Ball") {
+		player_->setCenterPendulum(other.transform().position());
 		player_->changeState(PlayerStateList::State_Pendulum);
 		die();
 	}

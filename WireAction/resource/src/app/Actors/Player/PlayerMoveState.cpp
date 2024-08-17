@@ -135,8 +135,12 @@ void PlayerMoveState::update()
 		break;
 
 	case SpeedDown:
-		if (moveSpeed_ - ACCELERATION*4 > 0) {
+		if (moveSpeed_ - ACCELERATION*2 > 0) {
 			moveSpeed_ -= ACCELERATION * 2;
+			//‘¬“x’²®
+			if (stateStartSpeed > moveSpeed_) {
+				stateStartSpeed = moveSpeed_;
+			}
 		}
 		else {
 			moveSpeed_ = 0;
@@ -174,7 +178,7 @@ void PlayerMoveState::update()
 	//’Ž‹“_Ý’è
 	parent_->setCameraLookPoint(cameraLookPoint_);
 
-
+	parent_->setDebugMoveSpeed(moveSpeed_);
 }
 void PlayerMoveState::lateUpdate()
 {

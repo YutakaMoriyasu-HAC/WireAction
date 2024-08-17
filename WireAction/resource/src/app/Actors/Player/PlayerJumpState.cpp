@@ -76,6 +76,12 @@ void PlayerJumpState::update()
 		parent_->ChangeMotionS(Motion_Jump, false); //モーション変更
 		parent_->velocity().y = 0.15f;
 		
+
+		cameraLookPoint_.x = parent_->GetPosition().x + velocity_.x;
+		cameraLookPoint_.z = parent_->GetPosition().z + velocity_.z;
+
+		//注視点設定
+		parent_->setCameraLookPoint(cameraLookPoint_);
 		return;
 	}
 
@@ -91,7 +97,7 @@ void PlayerJumpState::update()
 	//上昇中かつボタン離していたら減衰
 	//すぐ減衰すごく減衰
 	if (buttonReleaseFlag_ && velocity_.y > 0) {
-		velocity_.y -= ACCELERATION*100;
+		velocity_.y -= ACCELERATION*10;
 		if (velocity_.y < 0) {
 			velocity_.y = 0;
 		}
@@ -150,10 +156,6 @@ void PlayerJumpState::update()
 
 	cameraLookPoint_.x = parent_->GetPosition().x + velocity_.x;
 	cameraLookPoint_.z = parent_->GetPosition().z + velocity_.z;
-
-	//移動
-	//parent_->SetPosition(parent_->GetPosition() + velocity_);
-	//自然落下
 
 
 	//プレイヤーがジャンプ前の座標よりも下に落ちてたら注視点も下げる

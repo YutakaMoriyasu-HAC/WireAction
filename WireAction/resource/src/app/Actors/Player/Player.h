@@ -64,8 +64,14 @@ public:
 	//自然落下
 	void gravityFall(float delta_time);
 
-	//セットふっとオフセットセット
-	void setFootOffset(float footOffset);
+
+	//振り子の中心をセット
+	void setCenterPendulum(GSvector3 center);
+	//振り子の中心を取得
+	GSvector3 getCenterPendulum();
+
+	void setDebugMoveSpeed(float speed);
+
 private:
 
 
@@ -130,6 +136,9 @@ private:
 	
 	float footOffset_{ -1.0f };
 
+	GSvector3 centerPendulum_{ GSvector3::zero() };
+
+	float debugMoveSpeed_{ 0.0f };
 };
 
 #endif

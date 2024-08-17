@@ -45,9 +45,13 @@ void CameraTps::update(float delta_time)
 	//注視点取得
 	smoothPlayerLookPos_ = player->getCameraLookPoint();
 	float smoothPercent = 10.0f;
-	//位置補正タイム
+	/*/位置補正タイム
 	if (smoothPlayerLookPos_.y != prevPlayerLookPos_.y) {
 		smoothPlayerLookPos_.y = (smoothPlayerLookPos_.y - prevPlayerLookPos_.y) * (smoothPercent / 100.0f) + prevPlayerLookPos_.y;
+	}*/
+
+	if (smoothPlayerLookPos_ != prevPlayerLookPos_) {
+		smoothPlayerLookPos_ = (smoothPlayerLookPos_ - prevPlayerLookPos_) * (smoothPercent / 100.0f) + prevPlayerLookPos_;
 	}
 	
 

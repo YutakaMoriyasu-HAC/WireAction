@@ -18,6 +18,12 @@ PlayerThrowWireState::PlayerThrowWireState(Player* parent, IWorld* world, app::S
 void PlayerThrowWireState::init()
 {
 	parent_->spone(Actor_WireBeam);
+
+	//カメラ座標
+	cameraLookPoint_ = parent_->getCameraLookPoint();
+
+	//速度継承
+	velocity_ = parent_->velocity();
 	
 
 }
@@ -28,7 +34,16 @@ void PlayerThrowWireState::final()
 // 更新
 void PlayerThrowWireState::update()
 {
+	velocity_ = parent_->velocity();
+
 	parent_->changeState(PlayerStateList::State_Jump);
+
+	cameraLookPoint_.x = parent_->GetPosition().x + velocity_.x;
+	cameraLookPoint_.z = parent_->GetPosition().z + velocity_.z;
+
+	//注視点設定
+	parent_->setCameraLookPoint(cameraLookPoint_);
+
 	return;
 
 	
