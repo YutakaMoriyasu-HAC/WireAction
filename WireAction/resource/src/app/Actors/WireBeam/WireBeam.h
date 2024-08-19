@@ -24,12 +24,17 @@ private:
 	//デバックダメージ処理
 	bool isTestDamage_{ false };
 
-	float time_;
+	float time_{0.0f};
+	float timer_{ 0.0f };
+	bool turnFlag_{ false };
 
 	GSvector3 speed_{ 0,0,0 };
 	float size_{ 0.2f };
 
 	Player* player_;
+
+	GSvector3 goalPoint_{ 0,0,0 }; //目標地点の座標
+	GSvector3 start_{ 0,0,0 };
 
 };
 

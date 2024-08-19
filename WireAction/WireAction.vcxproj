@@ -175,6 +175,10 @@
     <ClCompile Include="resource\src\app\time\GameClock.cpp" />
     <ClCompile Include="resource\src\app\time\GameTimer.cpp" />
     <ClCompile Include="resource\src\app\time\Time.cpp" />
+    <ClCompile Include="resource\src\app\Tween\Tween.cpp" />
+    <ClCompile Include="resource\src\app\Tween\TweenUnit.cpp" />
+    <ClCompile Include="resource\src\app\Tween\ValueUnit.cpp" />
+    <ClCompile Include="resource\src\app\Tween\Vector3Unit.cpp" />
     <ClCompile Include="resource\src\app\Worlds\World.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -216,6 +220,10 @@
     <ClInclude Include="resource\src\app\time\GameClock.h" />
     <ClInclude Include="resource\src\app\time\GameTimer.h" />
     <ClInclude Include="resource\src\app\time\Time.h" />
+    <ClInclude Include="resource\src\app\Tween\Tween.h" />
+    <ClInclude Include="resource\src\app\Tween\TweenUnit.h" />
+    <ClInclude Include="resource\src\app\Tween\ValueUnit.h" />
+    <ClInclude Include="resource\src\app\Tween\Vector3Unit.h" />
     <ClInclude Include="resource\src\app\Worlds\IWorld.h" />
     <ClInclude Include="resource\src\app\Worlds\World.h" />
   </ItemGroup>

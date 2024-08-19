@@ -10,7 +10,8 @@ enum {
 
 //テクスチャ
 enum {
-	Texture_Skybox
+	Texture_Skybox,
+	Texture_Wire,
 };
 
 //オクトリー

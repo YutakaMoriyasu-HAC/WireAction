@@ -5,7 +5,7 @@
 #include "app/Math/Math.h"
 #include "app/Input/InputManager.h"
 #include "app/Namelist/PlayerStateList.h"
-#include <GSmathf.h>
+#include "app/NameList/Assets.h"
 
 
 
@@ -29,6 +29,7 @@ void PlayerPendulumState::init()
     angle90_         =0.0f;
     sinTheta_        =0.0f;
     previousPhi_     =0.0f;
+    position_= parent_->transform().position();
 
 	//ワイヤーに必要な初期値を計算する
 	wirePosition_ = parent_->getCenterPendulum();
@@ -124,6 +125,8 @@ void PlayerPendulumState::update()
         parent_->setCameraLookPoint(cameraLookPoint_);
         parent_->ChangeMotionS(Motion_Jump, false); //モーション変更
 
+        
+
         // モーションの変更
         // 移動量のxy成分だけ更新
         parent_->velocity(velocity_);
@@ -132,9 +135,13 @@ void PlayerPendulumState::update()
 
     //着地したら終了
     if (parent_->isGround()) {
-        parent_->changeState(PlayerStateList::State_Walk);
+        /*parent_->changeState(PlayerStateList::State_Walk);
         parent_->ChangeMotionS(Motion_Idle, false); //モーション変更
-        return;
+        parent_->velocity(GSvector3::zero());
+        return;*/
+        wireY_= wirePosition_.y - playerPosition.y;
+        wireRadius_ = sqrtf(wireX_ * wireX_ + (wireY_) * (wireY_));
+
     }
 
 
@@ -215,8 +222,69 @@ void PlayerPendulumState::update()
     previousPhi_ = phi_;
 
     //さて、ここからΦ(向き)変化
+    if (parent_->input_ != GSvector3::zero()) {
+        float shakeX = parent_->GetInput().x;
+        float shakeZ = parent_->GetInput().z;
+        if (shakeX < 0) {
+            sthickAngle_ = atanf(shakeZ / shakeX) + math::PI;
+        }
+        else if (shakeZ < 0) {
+            sthickAngle_ = atanf(shakeZ / shakeX) + math::PI * 2;
+        }
+        else {
+            sthickAngle_ = atanf(shakeZ / shakeX);
+        }
+
+        if (sthickAngle_ >= math::PI) {
+            sthickAngleForPhi_ = sthickAngle_ - math::PI;
+        }
+        else {
+            sthickAngleForPhi_ = sthickAngle_ + math::PI;
+        }
+
+        //マウスを振った角度とそこから180度回した角度、Φの角度に近い方に合わせないと反転する
+        //まず下側(マウス振った向きが)
+        if (sthickAngleForPhi_ < math::PI)
+        {
+            //手前の方が近い
+            if (abs(phi_ - sthickAngleForPhi_) < abs(phi_ - (sthickAngleForPhi_ + math::PI)))
+            {
+                mSAfP_Near = sthickAngleForPhi_;
+                angleSpeed_ -= ShakeLevel * 1/60;
+                //print("a");
+
+            }
+            else if (abs(phi_ - sthickAngleForPhi_) >= abs(phi_ - (sthickAngleForPhi_ + math::PI)))
+            {
+                //奥に向かって進んでる
+                mSAfP_Near = sthickAngleForPhi_ + math::PI;
+                angleSpeed_ += ShakeLevel * 1/60;
+
+                //print("b");
+            }
+        }
+        else//マウス振った向きが上側
+        {
+            //奥の方が近い
+            if (abs(phi_ - sthickAngleForPhi_) < abs(phi_ - (sthickAngleForPhi_ - math::PI)))
+            {
+                //奥に向かって進んでる
+                mSAfP_Near = sthickAngleForPhi_;
+                angleSpeed_ -= ShakeLevel * 1/60;
+
+            }
+            else if (abs(phi_ - sthickAngleForPhi_) >= abs(phi_ - (sthickAngleForPhi_ - math::PI)))
+            {
+                mSAfP_Near = sthickAngleForPhi_ - math::PI;
+                angleSpeed_ += ShakeLevel * 1/60;
+            }
+        }
+        
+    }
 
 
+    //回りましょうよ
+    phi_ += (mSAfP_Near - previousPhi_) * 1 / 60;
 
 
     //下に加速中に離しても上昇しない
@@ -245,7 +313,7 @@ void PlayerPendulumState::update()
 
     //振り子の向きを主人公が向いてる方向にする(これをやらないと正しく減衰しない)
     //振り子のベクトルを正規化する
-    float norm = sqrtf(velocity_.x * velocity_.x + velocity_.y * velocity_.y);
+    float norm = sqrtf(velocity_.x * velocity_.x + velocity_.z * velocity_.z);
     float mag = 1.0f / norm;
     my_Input_Direction_ = (velocity_ * mag);
     my_Input_Direction_.y = 0;
@@ -260,10 +328,52 @@ void PlayerPendulumState::update()
 }
 void PlayerPendulumState::lateUpdate()
 {
+
 }
 // 描画
 void PlayerPendulumState::draw() const
 {
+    GSvector2 startPoint = GSvector2::zero();
+    GSvector2 endPoint = GSvector2::zero();
+    GSvector3 handPosition = position_;
+    handPosition.y += 1.5f; //手の位置のオフセット
+    GSvector3 centerPosition = wirePosition_;
+
+    //それぞれの座標を画面座標に変換
+    gsCalculateScreen(&startPoint, &handPosition);
+    gsCalculateScreen(&endPoint, &centerPosition);
+
+    //画面座標がマイナスにならないようにする
+    if (startPoint.x > 10000) {
+        startPoint.x -= 20000.0f;
+    }
+    /*if (startPoint.y< 0) {
+        startPoint.y += 1080.0f;
+    }*/
+
+
+    gsDrawText("s%f\n", startPoint.x);
+    //gsDrawText("\ne%f", endPoint.x);
+
+    //画像の中心決定
+    static const GSvector2 center{16.0f,0.0f};
+    //色
+    GScolor color = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+    float nagasa = sqrtf((endPoint.y - startPoint.y) * (endPoint.y - startPoint.y) + (endPoint.x - startPoint.x) * (endPoint.x - startPoint.x));
+    GSvector2 end_scale{ 0.5f, nagasa/32.0f };
+
+    GSvector2 position = GSvector2(endPoint);
+
+    //画像の切り抜き
+    static const GSrect Rect{ 0.0f, 0.0f, 32.0f,32.0f };
+
+    //角度決定
+    float drawAngle = atan2f(endPoint.y - startPoint.y, endPoint.x - startPoint.x)*(180/math::PI)+90;
+
+    gsDrawSprite2D(Texture_Wire, &position, &Rect, &center,  &color, &end_scale, drawAngle);
+    //gsDrawSprite3D(Texture_Wire, &position_, &body, NULL, &color, &scale, 0.0f);
+    
 }
 void PlayerPendulumState::lateDraw() const
 {

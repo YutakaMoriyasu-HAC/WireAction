@@ -5,6 +5,7 @@
 #include <GStransform.h>
 #include <string>
 #include "app/BoundingSpheres/BoundingSphere.h"
+#include "app/Tween/Tween.h"
 
 class IWorld;	//ワールド抽象インターフェースの前方宣言
 
@@ -52,6 +53,8 @@ public:
 	void velocity(const GSvector3& vec);
 	//衝突判定データを取得
 	BoundingSphere collider() const;
+	// 指定された場所までTweenで移動する
+	TweenUnit& move_to(const GSvector3& to, float duration);
 
 	//コピー禁止
 	Actor(const Actor& other) = default;

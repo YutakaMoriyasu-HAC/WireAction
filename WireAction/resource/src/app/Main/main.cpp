@@ -3,6 +3,7 @@
 #include "app/Scenes/GamePlayScene/GamePlayScene.h"
 #include "app/screen/ScreenSize.h"
 #include"app/Input/InputManager.h"
+#include "app/Tween/Tween.h"
 
 class MyGame : public gslib::Game {
 
@@ -37,6 +38,8 @@ public:
 	void update(float delta_time) override {
 		//ワールドクラスの更新
 		scene_manager_.update(delta_time);
+		// Tweenの更新
+		Tween::update(delta_time);
 
 		// 終了
 		if (InputManager::IsGameEndState())

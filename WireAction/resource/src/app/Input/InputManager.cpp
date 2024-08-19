@@ -1,6 +1,6 @@
 #include "InputManager.h"
 
-bool InputManager::isRightAxisReversX_{ false };
+bool InputManager::isRightAxisReversX_{ true };
 bool InputManager::isRightAxisReversY_{ false };
 bool InputManager::canDashByRolling_{ false };
 float InputManager::cameraSensitivity_{ 2.0f };

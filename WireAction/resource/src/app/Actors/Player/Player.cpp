@@ -76,6 +76,9 @@ void Player::update(float delta_time) {
 }
 
 void Player::lateUpdate(float delta_time) {
+
+
+
 	//フレームの最後に今のフレームの入力状態を記録
 	input2_ = input_;
 
@@ -88,7 +91,7 @@ void Player::lateUpdate(float delta_time) {
 	//ImGui::Text("canCollideField:%s", canCollideField_ ? "true" : "false");
 	ImGui::Text("velocityY:%f", velocity_.y);
 	ImGui::Text("centerPendulumX:%f", centerPendulum_.x);
-	ImGui::Text("playerx:%f", transform_.position().x);
+	ImGui::Text("playerz:%f", transform_.position().z);
 	ImGui::Text("playerSpeed:%f", debugMoveSpeed_);
 
 	ImGui::End();
@@ -97,12 +100,13 @@ void Player::lateUpdate(float delta_time) {
 
 //描画
 void Player::draw() const {
-	//メッシュを描画
-	mesh_.draw();
+	
 	//衝突判定球のデバッグ表示
 	//collider().draw();
-
+	stateMachine_.draw();
 	
+	//メッシュを描画
+	mesh_.draw();
 	
 }
 
@@ -324,7 +328,7 @@ void Player::spone(int actorListNum) {
 
 	switch (actorListNum) {
 	case Actor_WireBeam:
-		world_->add_actor(std::make_shared<WireBeam>(world_, beamDirection_, beamDirection_ - transform_.position(), "Beam", 3.0f /*生存時間 */ , 1.0f, transform_.rotation(),this));
+		world_->add_actor(std::make_shared<WireBeam>(world_, beamDirection_, beamDirection_ - transform_.position(), "Beam", 30.0f /*伸ばす時間 */ , 0.2f, transform_.rotation(),this));
 		break;
 	}
 }

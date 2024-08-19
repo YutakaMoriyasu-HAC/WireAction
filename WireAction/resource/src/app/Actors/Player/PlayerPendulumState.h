@@ -69,6 +69,10 @@ private:
 
 	float upDirection_{ 1.0f }; //上向きなら1、下向きなら-1
 
+	float sthickAngle_{ 0.0f }; //スティックの角度
+	float sthickAngleForPhi_{ 0.0f };
+	float mSAfP_Near{ 0.0f };
+
 };
 
 

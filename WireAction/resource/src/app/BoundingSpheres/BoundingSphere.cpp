@@ -41,6 +41,7 @@ void BoundingSphere::draw() const {
     glutWireSphere(radius_, 16, 16);  // ワイヤーフレームの球体を描画
     glPopMatrix();
 #endif
+    
 }
 
 // 半径を取得

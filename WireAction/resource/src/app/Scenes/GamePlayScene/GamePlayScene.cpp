@@ -32,6 +32,8 @@ void GamePlayScene::start() {
 	gsLoadLightmap(LightMap, "resource/Assets/TestStage/LightMap/Lightmap.txt");
 	// リフレクションプローブの読み込み
 	gsLoadReflectionProbe(ReflectionProbe, "resource/Assets/TestStage/ReflectionProbe.txt");
+
+	gsLoadTexture(Texture_Wire, "resource/Assets/Ball/wire.png");
 	
 
 	//フィールドクラスの追加
@@ -123,4 +125,6 @@ void GamePlayScene::end() {
 	gsDeleteLightmap(LightMap);
 	//リフレクションプローブの削除
 	gsDeleteReflectionProbe(ReflectionProbe);
+
+	gsDeleteTexture(Texture_Wire);
 }
