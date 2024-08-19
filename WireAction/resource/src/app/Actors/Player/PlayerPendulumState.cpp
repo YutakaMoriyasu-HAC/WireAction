@@ -30,6 +30,7 @@ void PlayerPendulumState::init()
     sinTheta_        =0.0f;
     previousPhi_     =0.0f;
     position_= parent_->transform().position();
+    pendulumInvert_ = 1;
 
 	//ワイヤーに必要な初期値を計算する
 	wirePosition_ = parent_->getCenterPendulum();
@@ -107,6 +108,7 @@ void PlayerPendulumState::init()
     }
     
     velocity_ = GSvector3::zero();
+    mSAfP_Near = phi_;
 
 }
 // 終了
@@ -223,6 +225,17 @@ void PlayerPendulumState::update()
 
     //さて、ここからΦ(向き)変化
     if (parent_->input_ != GSvector3::zero()) {
+
+        //上側に行ってたら反転
+        if (angle_ < math::PI)
+        {
+            pendulumInvert_ = -1;
+        }
+        else
+        {
+            pendulumInvert_ = 1;
+        }
+
         float shakeX = parent_->GetInput().x;
         float shakeZ = parent_->GetInput().z;
         if (shakeX < 0) {
@@ -250,7 +263,7 @@ void PlayerPendulumState::update()
             if (abs(phi_ - sthickAngleForPhi_) < abs(phi_ - (sthickAngleForPhi_ + math::PI)))
             {
                 mSAfP_Near = sthickAngleForPhi_;
-                angleSpeed_ -= ShakeLevel * 1/60;
+                angleSpeed_ -= ShakeLevel * 1/60*pendulumInvert_;
                 //print("a");
 
             }
@@ -258,7 +271,7 @@ void PlayerPendulumState::update()
             {
                 //奥に向かって進んでる
                 mSAfP_Near = sthickAngleForPhi_ + math::PI;
-                angleSpeed_ += ShakeLevel * 1/60;
+                angleSpeed_ += ShakeLevel * 1/60 * pendulumInvert_;
 
                 //print("b");
             }
@@ -270,13 +283,13 @@ void PlayerPendulumState::update()
             {
                 //奥に向かって進んでる
                 mSAfP_Near = sthickAngleForPhi_;
-                angleSpeed_ -= ShakeLevel * 1/60;
+                angleSpeed_ -= ShakeLevel * 1/60 * pendulumInvert_;
 
             }
             else if (abs(phi_ - sthickAngleForPhi_) >= abs(phi_ - (sthickAngleForPhi_ - math::PI)))
             {
                 mSAfP_Near = sthickAngleForPhi_ - math::PI;
-                angleSpeed_ += ShakeLevel * 1/60;
+                angleSpeed_ += ShakeLevel * 1/60 * pendulumInvert_;
             }
         }
         

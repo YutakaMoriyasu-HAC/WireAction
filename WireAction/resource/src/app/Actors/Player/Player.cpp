@@ -328,7 +328,7 @@ void Player::spone(int actorListNum) {
 
 	switch (actorListNum) {
 	case Actor_WireBeam:
-		world_->add_actor(std::make_shared<WireBeam>(world_, beamDirection_, beamDirection_ - transform_.position(), "Beam", 30.0f /*L‚Î‚·ŠÔ */ , 0.2f, transform_.rotation(),this));
+		world_->add_actor(std::make_shared<WireBeam>(world_, beamDirection_, beamDirection_ - transform_.position(), "Beam", 30.0f /*L‚Î‚·ŠÔ */ , 1.0f, transform_.rotation(),this));
 		break;
 	}
 }

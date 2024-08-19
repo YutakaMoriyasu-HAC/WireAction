@@ -49,8 +49,8 @@ private:
 	float w_{ 0.0f };//重力[N]
 	const float G = 9.8f; //重力加速度
 	const float M = 3.5f; //体重
-	const float MaxAngleSpeed = 5.0f; //最高回転速度(振り子の回転の最高速度)
-	const float ShakeLevel = 3.0f; //振りやすさ(振り子の速度に倍率がかかる)
+	const float MaxAngleSpeed = 50.0f; //最高回転速度(振り子の回転の最高速度)
+	const float ShakeLevel = 0.5f; //振りやすさ(振り子の速度に倍率がかかる)
 
 	float wireX_{0.0f};
 	float wireY_{0.0f};
@@ -68,7 +68,7 @@ private:
 	bool isWire_{ true }; //ワイヤーが接続されているか
 
 	float upDirection_{ 1.0f }; //上向きなら1、下向きなら-1
-
+	float pendulumInvert_{ 1.0f }; //上側に行ってたらスティック入力前後反転
 	float sthickAngle_{ 0.0f }; //スティックの角度
 	float sthickAngleForPhi_{ 0.0f };
 	float mSAfP_Near{ 0.0f };
