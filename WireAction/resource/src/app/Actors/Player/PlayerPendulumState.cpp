@@ -127,8 +127,6 @@ void PlayerPendulumState::update()
         parent_->setCameraLookPoint(cameraLookPoint_);
         parent_->ChangeMotionS(Motion_Jump, false); //モーション変更
 
-        
-
         // モーションの変更
         // 移動量のxy成分だけ更新
         parent_->velocity(velocity_);
@@ -198,26 +196,42 @@ void PlayerPendulumState::update()
 
 	//壁が無かった時
 	//振り子の加速度変化
-	angleSpeed_ += (w_ / wireRadius_ * sinTheta_)*0.016f; //1/60
-    //最高速度で止めとく
-    if (angleSpeed_ > MaxAngleSpeed)
-    {
-        angleSpeed_ = MaxAngleSpeed;
+    if (parent_->isWall() && !parent_->isGround()) {
+        if (angleSpeed_ * angleSpeedBeforWall_ > 0) {
+            angleSpeed_ *= -1;
+        }
+        
+        angle_ += angleSpeed_ * 0.016f;
+        
     }
-    else if (angleSpeed_ < -MaxAngleSpeed)
-    {
-        angleSpeed_ = -MaxAngleSpeed;
-    }
+    else {
 
-    //振り子の角度を変化
-    angle_ += angleSpeed_ * 0.016f;
-    if (angle_ < 0)
-    {
-        angle_ += 2 * math::PI;
-    }
-    else if (angle_ > 2 * math::PI)
-    {
-        angle_ -= 2 * math::PI;
+
+
+        angleSpeed_ += (w_ / wireRadius_ * sinTheta_) * 0.016f; //1/60
+        //最高速度で止めとく
+        if (angleSpeed_ > MaxAngleSpeed)
+        {
+            angleSpeed_ = MaxAngleSpeed;
+        }
+        else if (angleSpeed_ < -MaxAngleSpeed)
+        {
+            angleSpeed_ = -MaxAngleSpeed;
+        }
+
+        //振り子の角度を変化
+        angle_ += angleSpeed_ * 0.016f;
+        if (angle_ < 0)
+        {
+            angle_ += 2 * math::PI;
+        }
+        else if (angle_ > 2 * math::PI)
+        {
+            angle_ -= 2 * math::PI;
+        }
+
+        angleSpeedBeforWall_ = angleSpeed_;
+
     }
 
     //現在の向きを一旦保存しておく
@@ -264,7 +278,6 @@ void PlayerPendulumState::update()
             {
                 mSAfP_Near = sthickAngleForPhi_;
                 angleSpeed_ -= ShakeLevel * 1/60*pendulumInvert_;
-                //print("a");
 
             }
             else if (abs(phi_ - sthickAngleForPhi_) >= abs(phi_ - (sthickAngleForPhi_ + math::PI)))
@@ -273,7 +286,6 @@ void PlayerPendulumState::update()
                 mSAfP_Near = sthickAngleForPhi_ + math::PI;
                 angleSpeed_ += ShakeLevel * 1/60 * pendulumInvert_;
 
-                //print("b");
             }
         }
         else//マウス振った向きが上側
@@ -314,10 +326,6 @@ void PlayerPendulumState::update()
     //だから新しい座標から前の座標を引いた値を速度にする
     parent_->velocity(position_-playerPosition);
 
-    // モーションの変更
-    // 移動量のxy成分だけ更新
-    //parent_->velocity(velocity_);
-
     cameraLookPoint_ = wirePosition_;
     cameraLookPoint_.y = wirePosition_.y - wireRadius_ * 0.5f;
     //注視点設定
@@ -334,10 +342,6 @@ void PlayerPendulumState::update()
 
 
 	return;
-
-
-
-
 }
 void PlayerPendulumState::lateUpdate()
 {
@@ -365,9 +369,6 @@ void PlayerPendulumState::draw() const
     }*/
 
 
-    gsDrawText("s%f\n", startPoint.x);
-    //gsDrawText("\ne%f", endPoint.x);
-
     //画像の中心決定
     static const GSvector2 center{16.0f,0.0f};
     //色
@@ -385,7 +386,7 @@ void PlayerPendulumState::draw() const
     float drawAngle = atan2f(endPoint.y - startPoint.y, endPoint.x - startPoint.x)*(180/math::PI)+90;
 
     gsDrawSprite2D(Texture_Wire, &position, &Rect, &center,  &color, &end_scale, drawAngle);
-    //gsDrawSprite3D(Texture_Wire, &position_, &body, NULL, &color, &scale, 0.0f);
+    //(Texture_Wire, &position_, &Rect, NULL, &color, &end_scale, drawAngle);
     
 }
 void PlayerPendulumState::lateDraw() const

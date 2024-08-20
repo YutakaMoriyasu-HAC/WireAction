@@ -155,6 +155,7 @@
     <ClCompile Include="resource\src\app\Actors\Player\PlayerJumpState.cpp" />
     <ClCompile Include="resource\src\app\Actors\Player\PlayerMoveState.cpp" />
     <ClCompile Include="resource\src\app\Actors\Player\PlayerPendulumState.cpp" />
+    <ClCompile Include="resource\src\app\Actors\Player\PlayerQuickWireState.cpp" />
     <ClCompile Include="resource\src\app\Actors\Player\PlayerThrowWireState.cpp" />
     <ClCompile Include="resource\src\app\Actors\WireBeam\WireBeam.cpp" />
     <ClCompile Include="resource\src\app\AnimatedMesh\AnimatedMesh.cpp" />
@@ -191,6 +192,7 @@
     <ClInclude Include="resource\src\app\Actors\Player\PlayerJumpState.h" />
     <ClInclude Include="resource\src\app\Actors\Player\PlayerMoveState.h" />
     <ClInclude Include="resource\src\app\Actors\Player\PlayerPendulumState.h" />
+    <ClInclude Include="resource\src\app\Actors\Player\PlayerQuickWireState.h" />
     <ClInclude Include="resource\src\app\Actors\Player\PlayerThrowWireState.h" />
     <ClInclude Include="resource\src\app\Actors\WireBeam\WireBeam.h" />
     <ClInclude Include="resource\src\app\AnimatedMesh\AnimatedMesh.h" />

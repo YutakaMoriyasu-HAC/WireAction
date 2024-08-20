@@ -8,6 +8,7 @@
 #include "PlayerJumpState.h"
 #include "PlayerThrowWireState.h"
 #include "PlayerPendulumState.h"
+#include "PlayerQuickWireState.h"
 #include "app/Input/InputManager.h"
 #include "app/Actors/WireBeam/WireBeam.h"
 #include <imgui/imgui.h>
@@ -93,6 +94,7 @@ void Player::lateUpdate(float delta_time) {
 	ImGui::Text("centerPendulumX:%f", centerPendulum_.x);
 	ImGui::Text("playerz:%f", transform_.position().z);
 	ImGui::Text("playerSpeed:%f", debugMoveSpeed_);
+	ImGui::Text("playerSpeed:%d", isWall_);
 
 	ImGui::End();
 	
@@ -200,6 +202,10 @@ void Player::collide_field() {
 		center.y = transform_.position().y;
 		//補正後の座標に変更する
 		transform_.position(center);
+		isWall_ = true;
+	}
+	else {
+		isWall_ = false;
 	}
 
 	//地面との衝突判定(線分との交差判定)
@@ -249,6 +255,7 @@ void Player::InitState() {
 	stateMachine_.addState(PlayerStateList::State_Jump, std::make_shared<PlayerJumpState>(this, world_, &stateMachine_));
 	stateMachine_.addState(PlayerStateList::State_ThrowWire, std::make_shared<PlayerThrowWireState>(this, world_, &stateMachine_));
 	stateMachine_.addState(PlayerStateList::State_Pendulum, std::make_shared<PlayerPendulumState>(this, world_, &stateMachine_));
+	stateMachine_.addState(PlayerStateList::State_QuickWire, std::make_shared<PlayerQuickWireState>(this, world_, &stateMachine_));
 
 
 	// ステートマシンの初期化
@@ -307,6 +314,10 @@ bool Player::isGround() {
 	return isGround_;
 }
 
+bool Player::isWall() {
+	return isWall_;
+}
+
 //注視点取得
 GSvector3 Player::getCameraLookPoint() {
 	return cameraLookPoint_;
@@ -328,7 +339,9 @@ void Player::spone(int actorListNum) {
 
 	switch (actorListNum) {
 	case Actor_WireBeam:
+		if (isThrowing_)break;
 		world_->add_actor(std::make_shared<WireBeam>(world_, beamDirection_, beamDirection_ - transform_.position(), "Beam", 30.0f /*伸ばす時間 */ , 1.0f, transform_.rotation(),this));
+		isThrowing_ = true;
 		break;
 	}
 }
@@ -353,4 +366,12 @@ GSvector3 Player::getCenterPendulum() {
 
 void Player::setDebugMoveSpeed(float speed) {
 	debugMoveSpeed_ = speed;
+}
+
+void Player::setThrowing(bool throwing) {
+	isThrowing_ = throwing;
+}
+
+bool Player::getThrowing() {
+	return isThrowing_;
 }

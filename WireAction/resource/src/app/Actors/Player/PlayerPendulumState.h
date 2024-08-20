@@ -73,6 +73,8 @@ private:
 	float sthickAngleForPhi_{ 0.0f };
 	float mSAfP_Near{ 0.0f };
 
+	float angleSpeedBeforWall_{ 0.0f };
+
 };
 
 

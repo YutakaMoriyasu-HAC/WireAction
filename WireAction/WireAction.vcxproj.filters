@@ -117,6 +117,9 @@
     <ClCompile Include="resource\src\app\Tween\Vector3Unit.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="resource\src\app\Actors\Player\PlayerQuickWireState.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource\src\app\Worlds\IWorld.h">
@@ -249,6 +252,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="resource\src\app\Tween\Vector3Unit.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="resource\src\app\Actors\Player\PlayerQuickWireState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

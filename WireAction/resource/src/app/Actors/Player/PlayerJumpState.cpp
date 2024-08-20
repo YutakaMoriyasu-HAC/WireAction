@@ -61,15 +61,18 @@ void PlayerJumpState::update()
 
 	//空中ジャンプ
 	if (InputManager::IsAButtonTrigger() && jumpNum_ >= 1) {
-		parent_->velocity().y = 0.15f;
+		buttonReleaseFlag_ = false;
+		parent_->velocity().y = 0.23f;
 		cameraLookPoint_.y = (cameraLookPoint_.y+parent_->GetPosition().y)/2;
 		jumpNum_ -= 1;
 		parent_->ChangeMotionS(Motion_Jump, false); //モーション変更
-		buttonReleaseFlag_ = false;
+		return;
 	}
 
 	//Xボタンを押したらワイヤー投げに移行
 	if (InputManager::IsXButtonTrigger()) {
+		if (parent_->getThrowing())return;
+
 		changeAngle(600.0f);
 		parent_->setBeamDirection(my_Input_Direction_);
 		parent_->changeState(PlayerStateList::State_ThrowWire);
@@ -89,6 +92,7 @@ void PlayerJumpState::update()
 	if (!InputManager::IsAButtonState() && !buttonReleaseFlag_) {
 		buttonReleaseFlag_ = true;
 	}
+	
 
 	
 

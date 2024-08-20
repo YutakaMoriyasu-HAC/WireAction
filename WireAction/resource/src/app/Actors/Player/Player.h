@@ -46,6 +46,7 @@ public:
 
 	//地面についてる？
 	bool isGround();
+	bool isWall();
 
 	//注視点取得
 	GSvector3 getCameraLookPoint();
@@ -72,6 +73,9 @@ public:
 
 	void setDebugMoveSpeed(float speed);
 
+	void setThrowing(bool throwing);
+	bool getThrowing();
+
 private:
 
 
@@ -92,6 +96,8 @@ private:
 
 	// 移動入力
 	GSvector3 MoveInput();
+
+	
 
 public:
 	GSvector3 input_ = { 0,0,0 };	//入力1
@@ -123,6 +129,7 @@ private:
 	GSvector3 input_Direction_{ 0,0,1 };
 
 	bool isGround_{ false };
+	bool isWall_{ false };
 
 	//カメラの注視点(ジャンプで変わるため変数にしておく)
 	GSvector3 cameraLookPoint_{ 0,0,0 };
@@ -139,6 +146,9 @@ private:
 	GSvector3 centerPendulum_{ GSvector3::zero() };
 
 	float debugMoveSpeed_{ 0.0f };
+
+	//ワイヤーを投げているか
+	bool isThrowing_{ false };
 };
 
 #endif

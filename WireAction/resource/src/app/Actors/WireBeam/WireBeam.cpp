@@ -6,6 +6,8 @@
 #include "app/Actors/Player/Player.h"
 #include "app/NameList/PlayerStateList.h"
 #include "app/Math/Math.h"
+#include "app/Input/InputManager.h"
+#include "app/Field/Field.h"
 
 
 WireBeam::WireBeam(IWorld* world, const GSvector3& position, const GSvector3& speed, const std::string& name, float lifeTime, float size, GSquaternion qua, Player* player) :
@@ -27,40 +29,91 @@ WireBeam::WireBeam(IWorld* world, const GSvector3& position, const GSvector3& sp
 	transform_.rotation(qua);
 	//player_ = player;
 
+	//距離10
 	goalPoint_ = transform_.position() + (speed_*10);
+
+	flagRotation = false;
 
 
 }
 
 void WireBeam::update(float delta_time)
 {
-	//transform_.position(transform_.position() + speed_ * (delta_time / 60) * size_ * 5 * 5.0f);
-	collider_ = BoundingSphere{ size_ };
+	
 
-	GSvector3 posHead = player_->transform().position();
-	posHead.y += 1.5f;
-	if (!turnFlag_) {
-		move_to(goalPoint_, time_).name("wire").ease(EaseType::EaseOutQuint);
-	}
-	else {
-		move_to(posHead, time_/2).name("wire").ease(EaseType::EaseOutQuad);
-	}
 
-	timer_ -= delta_time;
-	if (timer_ <= 0) {
+	if (!flagRotation) {
+		//transform_.position(transform_.position() + speed_ * (delta_time / 60) * size_ * 5 * 5.0f);
+		collider_ = BoundingSphere{ size_ };
+
+		GSvector3 posHead = player_->transform().position();
+		posHead.y += 1.5f;
 		if (!turnFlag_) {
-			Tween::cancel("wire");
-			timer_ = time_;
-			turnFlag_ = true;
-			return;
-			
+			move_to(goalPoint_, time_).name("wire").ease(EaseType::EaseOutQuint);
 		}
 		else {
-			Tween::cancel("wire");
-			die();
+			move_to(posHead, time_ / 2).name("wire").ease(EaseType::EaseOutQuad);
 		}
+
+		timer_ -= delta_time;
+		if (timer_ <= 0) {
+			if (!turnFlag_) {
+				Tween::cancel("wire");
+				timer_ = time_;
+				turnFlag_ = true;
+				return;
+
+			}
+			else {
+				Tween::cancel("wire");
+				player_->setThrowing(false);
+				die();
+			}
+
+		}
+
+		if (!turnFlag_ && timer_ > time_ - 6)return;
+		if (InputManager::IsXButtonTrigger()) {
+			flagRotation = true;
+			Tween::cancel("wire");
+			timer_ = 3;
+		}
+	}
+	else {
+
+		timer_ += 0.3f;
+
+		collider_ = BoundingSphere{ size_ };
+
+		if (timer_ > 10) {
+			timer_ = 30;
+		}
+
+		
+
+
+
+
+		//入力
+		rotateAngle_ += 23;
+
+		//rotateAngle_.y = 25;
+		if (rotateAngle_ < 0) rotateAngle_ += 360;
+		if (rotateAngle_ > 360) rotateAngle_ -= 360;
+		rotateAngleE_ = rotateAngle_ * (math::PI / 180);
+
+		GSvector3 position;
+
+		//カメラのy座標決定
+		position.x = player_->transform().position().x + cosf(rotateAngleE_) * 10;
+		position.z = player_->transform().position().z + sinf(rotateAngleE_) * 10;
+		position.y = transform_.position().y;
+		transform_.position(position);
 		
 	}
+
+	//フィールドとの衝突判定
+	collide_field();
 
 }
 
@@ -116,17 +169,39 @@ void WireBeam::react(Actor& other)
 {
 
 	if (other.name() == "Ball") {
+		GSvector3 ballPosition = other.transform().position();
+		GSvector3 pPosition = player_->transform().position();
+		float distance = sqrtf(( ballPosition.x - pPosition.x) * (ballPosition.x - pPosition.x) +
+								(ballPosition.y - pPosition.y) * (ballPosition.y - pPosition.y) +
+								(ballPosition.z - pPosition.z) * (ballPosition.z - pPosition.z));
+		if (distance > 10)return;
+
 		Tween::cancel("wire");
 		player_->setCenterPendulum(other.transform().position());
 		player_->changeState(PlayerStateList::State_Pendulum);
+		player_->setThrowing(false);
 		die();
 	}
 
 	if (other.name() == "Player" && turnFlag_) {
 		Tween::cancel("wire");
+		player_->setThrowing(false);
 		die();
 	}
 	
 
 
+}
+
+void WireBeam::collide_field() {
+	//壁との衝突判定(球体との判定)
+	GSvector3 center;	//衝突後の球体の中心座標
+	if (world_->field()->collide(collider(), &center)) {
+		
+		Tween::cancel("wire");
+		player_->setCenterPendulum(center);
+		player_->changeState(PlayerStateList::State_QuickWire);
+		player_->setThrowing(false);
+		die();
+	}
 }

@@ -6,6 +6,7 @@ enum PlayerStateList {
 	State_Jump,
 	State_ThrowWire,
 	State_Pendulum,
+	State_QuickWire,
 
 };
 

@@ -20,6 +20,11 @@ public:
 	virtual void draw()const override;
 	//衝突判定
 	virtual void react(Actor& other)override;
+
+private:
+	void collide_field();
+
+
 private:
 	//デバックダメージ処理
 	bool isTestDamage_{ false };
@@ -35,6 +40,12 @@ private:
 
 	GSvector3 goalPoint_{ 0,0,0 }; //目標地点の座標
 	GSvector3 start_{ 0,0,0 };
+
+	float rotateAngle_{ 0.0f };
+	float rotateAngleE_{ 0.0f };
+
+	bool flagRotation{ false };
+
 
 };
 
