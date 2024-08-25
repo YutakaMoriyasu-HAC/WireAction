@@ -40,6 +40,14 @@ void StateMachine::reset(const int stateTag)
 	// 現在のステートをセット
 	nowStateID_ = stateTag;
 }
+
+void StateMachine::resetTimer() {
+	// タイマを空に
+	std::stack<float>().swap(timer_);
+	// 新しいタイマを追加
+	timer_.push(0.0f);
+}
+
 // 更新
 void StateMachine::update()
 {

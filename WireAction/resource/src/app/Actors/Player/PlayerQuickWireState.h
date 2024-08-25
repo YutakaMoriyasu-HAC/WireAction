@@ -39,10 +39,13 @@ private:
 	GSvector3 my_Input_Direction_{ 0,0,0 };
 	GSvector3 velocity_{ 0.0f,0.0f,0.0f }; //速度
 	GSvector3 wirePosition_{ 0,0,0 }; //振り子の中心
+	GSvector3 previousPosition_{ 0,0,0 };
 
 	float timer_{ 0.0f };
 	float time_{ 60.0f };
 
+	
+	GSvector3 startDirection_{ 0,0,0 }; //開始時の向き
 };
 
 #endif

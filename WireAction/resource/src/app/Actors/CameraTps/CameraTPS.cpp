@@ -62,7 +62,7 @@ void CameraTps::update(float delta_time)
 	}
 
 	//LBでカメラリセット
-	if (InputManager::IsCameraResetState()) {
+	if (InputManager::IsCameraReset()) {
 		cameraAngle_.x = player->transform().localEulerAngles().y * (-1) + 270;
 		cameraAngle_.y = 25;
 	}

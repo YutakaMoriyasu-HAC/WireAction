@@ -56,18 +56,60 @@ void PlayerJumpState::update()
 	velocity_ = parent_->velocity();
 	moveSpeed_ = sqrtf((velocity_.x * velocity_.x) + (velocity_.z * velocity_.z));
 
-	
-	//parent_->setCanCollideField(true);
+	//ループ
+	if (parent_->IsMotionEnd() &&
+		(parent_->GetMotionState() == Motion_JumpIn || parent_->GetMotionState() == Motion_BackRolling || parent_->GetMotionState() == Motion_JumpSpin)) {
+		parent_->ChangeMotionS(Motion_JumpNow, true, 0.1f); //モーション変更
+	}
+
+
 
 	//空中ジャンプ
 	if (InputManager::IsAButtonTrigger() && jumpNum_ >= 1) {
 		buttonReleaseFlag_ = false;
+		//スティック倒してる時、大きく移動
+		if (parent_->input_ != GSvector3::zero()) {
+			my_Input_Direction_ = parent_->GetInput();
+			//向いてる方向に速度をかけて加速度にする
+			if (moveSpeed_ < MAX_SPEED) {
+				
+				velocity_ = my_Input_Direction_ * MAX_SPEED;
+				parent_->velocity(velocity_);
+				//通常の歩行よりも速いスピードのまま歩き状態になった時、その速度を維持するということ
+				stateStartSpeed = sqrtf((velocity_.x * velocity_.x) + (velocity_.z * velocity_.z));
+			}
+		}
+		
 		parent_->velocity().y = 0.23f;
 		cameraLookPoint_.y = (cameraLookPoint_.y+parent_->GetPosition().y)/2;
 		jumpNum_ -= 1;
-		parent_->ChangeMotionS(Motion_Jump, false); //モーション変更
+		
+		parent_->ChangeMotionS(Motion_JumpSpin, false,1.0f,0.5f,2.0f); //モーション変更
+		parent_->resetStateTimer();
+		
+		
+		
+		changeAngle(600.0f);
+		//いろいろ変えちゃった回転方向を親に返す
+		parent_->SetInputDirection(my_Input_Direction_);
 		return;
 	}
+
+	//ボディアタック
+	//別のステートにした方がいい
+	if (InputManager::IsCameraResetTrigger()) {
+		parent_->ChangeMotionS(Motion_BodyAttack, true, 1.0f, 0.5f, 0.0f); //モーション変更
+		parent_->resetStateTimer();
+		my_Input_Direction_ = parent_->GetInput();
+		velocity_ = my_Input_Direction_ * 0.2f;
+		velocity_.y = 0.18f;
+		parent_->velocity(velocity_);
+		changeAngle(600.0f);
+		//いろいろ変えちゃった回転方向を親に返す
+		parent_->SetInputDirection(my_Input_Direction_);
+		return;
+	}
+	
 
 	//Xボタンを押したらワイヤー投げに移行
 	if (InputManager::IsXButtonTrigger()) {
@@ -76,7 +118,7 @@ void PlayerJumpState::update()
 		changeAngle(600.0f);
 		parent_->setBeamDirection(my_Input_Direction_);
 		parent_->changeState(PlayerStateList::State_ThrowWire);
-		parent_->ChangeMotionS(Motion_Jump, false); //モーション変更
+		parent_->ChangeMotionS(Motion_JumpNow, true); //モーション変更
 		parent_->velocity().y = 0.15f;
 		
 
@@ -93,7 +135,7 @@ void PlayerJumpState::update()
 		buttonReleaseFlag_ = true;
 	}
 	
-
+	
 	
 
 	
@@ -115,8 +157,12 @@ void PlayerJumpState::update()
 	//向いてる方向
 	my_Input_Direction_ = parent_->GetInput();
 
+	
+
 	//スティック入力があった時、現在のベクトルからスティック入力方向までのベクトルを求める
 	if (parent_->input_ != GSvector3::zero()) {
+
+		
 
 		//my_Input_Direction_の角度
 		float inputAngle = atanf(my_Input_Direction_.z / my_Input_Direction_.x)*(180/math::PI);
@@ -150,8 +196,7 @@ void PlayerJumpState::update()
 	
 
 
-	//いろいろ変えちゃった回転方向を親に返す
-	parent_->SetInputDirection(my_Input_Direction_);
+	
 
 	// モーションの変更
 	// 移動量のxy成分だけ更新
@@ -174,7 +219,9 @@ void PlayerJumpState::update()
 	//着地したら終了
 	if (parent_->isGround()) {
 		parent_->changeState(PlayerStateList::State_Walk);
-		parent_->ChangeMotionS(Motion_Idle, false); //モーション変更
+		parent_->ChangeMotionS(Motion_Idle, true); //モーション変更
+		//いろいろ変えちゃった回転方向を親に返す
+		parent_->SetInputDirection(my_Input_Direction_);
 		return;
 	}
 

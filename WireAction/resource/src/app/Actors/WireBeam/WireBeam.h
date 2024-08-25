@@ -43,6 +43,7 @@ private:
 
 	float rotateAngle_{ 0.0f };
 	float rotateAngleE_{ 0.0f };
+	float rotateDistance_{ 0.0f };
 
 	bool flagRotation{ false };
 

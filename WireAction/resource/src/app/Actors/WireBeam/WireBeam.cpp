@@ -77,13 +77,15 @@ void WireBeam::update(float delta_time)
 			flagRotation = true;
 			Tween::cancel("wire");
 			timer_ = 3;
+			rotateAngle_ = atan2f(goalPoint_.z - posHead.z, goalPoint_.x - posHead.x) * (180 / math::PI);
+			rotateDistance_ = 0.0f;
 		}
 	}
 	else {
 
 		timer_ += 0.3f;
 
-		collider_ = BoundingSphere{ size_ };
+		collider_ = BoundingSphere{ size_*2 };
 
 		if (timer_ > 10) {
 			timer_ = 30;
@@ -96,6 +98,7 @@ void WireBeam::update(float delta_time)
 
 		//入力
 		rotateAngle_ += 23;
+		rotateDistance_ += 23;
 
 		//rotateAngle_.y = 25;
 		if (rotateAngle_ < 0) rotateAngle_ += 360;
@@ -103,12 +106,15 @@ void WireBeam::update(float delta_time)
 		rotateAngleE_ = rotateAngle_ * (math::PI / 180);
 
 		GSvector3 position;
-
-		//カメラのy座標決定
 		position.x = player_->transform().position().x + cosf(rotateAngleE_) * 10;
 		position.z = player_->transform().position().z + sinf(rotateAngleE_) * 10;
 		position.y = transform_.position().y;
 		transform_.position(position);
+
+		if (rotateDistance_ >= 360) {
+			flagRotation = false;
+			turnFlag_ = true;
+		}
 		
 	}
 
@@ -125,7 +131,7 @@ void WireBeam::draw() const
 	GSvector2 startPoint;
 	GSvector2 endPoint;
 	GSvector3 handPosition = player_->transform().position();
-	handPosition.y += 1.5f; //手の位置のオフセット
+	handPosition.y += 0.5f; //手の位置のオフセット
 	GSvector3 centerPosition = transform_.position();
 
 	//それぞれの座標を画面座標に変換
@@ -189,6 +195,14 @@ void WireBeam::react(Actor& other)
 		die();
 	}
 	
+	if (other.tag() == "EnemyTag") {
+		Tween::cancel("wire");
+		player_->setCenterPendulum(other.transform().position());
+		player_->changeState(PlayerStateList::State_QuickWire);
+		player_->setThrowing(false);
+		die();
+	}
+
 
 
 }
@@ -198,6 +212,15 @@ void WireBeam::collide_field() {
 	GSvector3 center;	//衝突後の球体の中心座標
 	if (world_->field()->collide(collider(), &center)) {
 		
+		GSvector3 ballPosition = center;
+		GSvector3 pPosition = player_->transform().position();
+		float distance = sqrtf((ballPosition.x - pPosition.x) * (ballPosition.x - pPosition.x) +
+			(ballPosition.y - pPosition.y) * (ballPosition.y - pPosition.y) +
+			(ballPosition.z - pPosition.z) * (ballPosition.z - pPosition.z));
+		if (distance > 10)return;
+
+
+
 		Tween::cancel("wire");
 		player_->setCenterPendulum(center);
 		player_->changeState(PlayerStateList::State_QuickWire);

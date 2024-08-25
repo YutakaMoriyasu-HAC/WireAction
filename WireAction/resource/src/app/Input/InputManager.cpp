@@ -58,7 +58,12 @@ const GSvector2 InputManager::CameraRotation()
 
 const bool InputManager::IsCameraReset()
 {
-    return gsXBoxPadButtonTrigger(PAD_NUM, GS_XBOX_PAD_LEFT_SHOULDER) ? true : gsGetKeyTrigger(GKEY_Q);
+    return gsXBoxPadButtonTrigger(PAD_NUM, GS_XBOX_PAD_RIGHT_SHOULDER) ? true : gsGetKeyTrigger(GKEY_E);
+}
+
+const bool InputManager::IsCrouchState()
+{
+    return gsXBoxPadButtonState(PAD_NUM, GS_XBOX_PAD_LEFT_SHOULDER) ? true : gsGetKeyState(GKEY_Q);
 }
 
 const bool InputManager::IsDecisionTrigger()

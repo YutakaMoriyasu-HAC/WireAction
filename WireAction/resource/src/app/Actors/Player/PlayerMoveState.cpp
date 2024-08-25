@@ -4,7 +4,7 @@
 #include "app/time/Time.h"
 #include "app/Math/Math.h"
 #include "app/Input/InputManager.h"
-
+#include "app/NameList/Assets.h"
 
 // 移動速度
 const float MIN_SPEED{ 0.008f };
@@ -46,6 +46,9 @@ void PlayerMoveState::init()
 		SState_ = SpeedDown;
 	}
 
+	//前のフレームの向いてる角度
+	previousAngle_ = math::angleFromVector2Deg(my_Input_Direction_.x, my_Input_Direction_.z);
+
 }
 // 終了
 void PlayerMoveState::final()
@@ -62,12 +65,12 @@ void PlayerMoveState::update()
 	moveSpeed_ = sqrtf((velocity_.x * velocity_.x) + (velocity_.z * velocity_.z));
 
 	//ジャンプボタンが押されたらステート変更
-	if (InputManager::IsAButtonTrigger()) {
+	if (InputManager::IsAButtonTrigger() && SState_!=brake) {
 		cameraLookPoint_ = parent_->GetPosition() + velocity_;
 		parent_->changeState(PlayerStateList::State_Jump);
 		parent_->velocity().y = 0.32f; //0.18
 		parent_->setCameraLookPoint(cameraLookPoint_);
-		parent_->ChangeMotionS(Motion_Jump, false); //モーション変更
+		parent_->ChangeMotionS(Motion_JumpIn, false); //モーション変更
 		return;
 	}
 
@@ -78,10 +81,38 @@ void PlayerMoveState::update()
 		return;
 	}
 
+	//Xボタンを押したらワイヤー投げに移行
+	if (InputManager::IsXButtonTrigger()) {
+		if (parent_->getThrowing())return;
+
+		changeAngle(600.0f);
+		parent_->setBeamDirection(my_Input_Direction_);
+		parent_->changeState(PlayerStateList::State_ThrowWire);
+		parent_->ChangeMotionS(Motion_JumpNow, false); //モーション変更
+
+
+		cameraLookPoint_.x = parent_->GetPosition().x + velocity_.x;
+		cameraLookPoint_.z = parent_->GetPosition().z + velocity_.z;
+
+		//注視点設定
+		parent_->setCameraLookPoint(cameraLookPoint_);
+		return;
+	}
+
+	//しゃがみ
+	if (InputManager::IsCrouchState()) {
+		parent_->setCameraLookPoint(cameraLookPoint_);
+		parent_->changeState(PlayerStateList::State_Crouch);
+		parent_->ChangeMotionS(Motion_Crouch, true); //モーション変更
+		return;
+	}
+
 	//座標取得
 	position_ = parent_->GetPosition();
 	//向いてる方向取得
 	my_Input_Direction_ = parent_->GetInput();
+
+	float nowAngle = 0;
 
 	//移動速度の計算
 	//速度に応じてさらに状態分けする
@@ -93,9 +124,13 @@ void PlayerMoveState::update()
 		if (parent_->input2_ == GSvector3::zero() && parent_->input_ != GSvector3::zero()) {
 			moveSpeed_ = MIN_SPEED;
 			SState_ = SpeedUp;
-			parent_->ChangeMotionS(Motion_Dash, true, 1.1f); //モーション変更
+			parent_->ChangeMotionS(Motion_Run, true, 1.1f); //モーション変更
 			my_Input_Direction_ = parent_->GetInput();
 		}
+
+		//向いてる方向に速度をかけて加速度にする
+		velocity_ = my_Input_Direction_ * moveSpeed_;
+
 		break;
 
 	case SpeedUp:
@@ -115,9 +150,17 @@ void PlayerMoveState::update()
 		else {
 			moveSpeed_ = MAX_SPEED;
 		}
-		//もしアニメが変わってなかったら変更
-		if (parent_->GetMotionState() != Motion_Dash) {
-			parent_->ChangeMotionS(Motion_Dash, true, 1.1f); //モーション変更
+
+		if (moveSpeed_ > MAX_SPEED) {
+			//転がり中は減衰
+			parent_->ChangeMotionS(Motion_Rolling, true, moveSpeed_*10.0f,0.5f,8); //モーション変更
+			moveSpeed_ -= ACCELERATION / 2;
+			stateStartSpeed = moveSpeed_;
+			
+
+		}else if (parent_->GetMotionState() != Motion_Run) {
+			//もしアニメが変わってなかったら変更
+			parent_->ChangeMotionS(Motion_Run, true, 1.1f); //モーション変更
 		}
 
 		//スティックが離された瞬間
@@ -125,12 +168,26 @@ void PlayerMoveState::update()
 			//減速開始
 			SState_ = SpeedDown;
 			parent_->ChangeMotionS(Motion_Walk, true); //モーション変更
-			break;
+		}
+		else {
+			if (parent_->input2_ != parent_->input_) {
+				my_Input_Direction_ = parent_->GetInput();
+			}
 		}
 
-		if (parent_->input2_ != parent_->input_) {
-			my_Input_Direction_ = parent_->GetInput();
+		nowAngle = math::angleFromVector2Deg(my_Input_Direction_.x, my_Input_Direction_.z);
+		if (nowAngle < 0)nowAngle += 360;
+		//急に逆方向にスティック
+		if (abs(180-abs(previousAngle_ - nowAngle)) <30
+			&& nowAngle!=0
+			&& moveSpeed_ > MIN_SPEED/2) {
+			SState_ = brake;
+			parent_->ChangeMotionS(Motion_Brake, true); //Brake
 		}
+
+		
+		//向いてる方向に速度をかけて加速度にする
+		velocity_ = my_Input_Direction_ * moveSpeed_;
 
 		break;
 
@@ -147,18 +204,72 @@ void PlayerMoveState::update()
 			SState_ = Stop;
 			parent_->ChangeMotionS(Motion_Idle, true); //モーション変更
 		}
+
+		//後ろ向きだったら速度も後ろ向き
+		if (velocity_.x * my_Input_Direction_.x <= 0 && velocity_.z * my_Input_Direction_.z <= 0) {
+			moveSpeed_ *= -1;
+		}
+
 		//スティックが倒された瞬間
 		if (parent_->input2_ == GSvector3::zero() && parent_->input_ != GSvector3::zero()) {
-			moveSpeed_ = MIN_SPEED;
-			SState_ = SpeedUp;
 			my_Input_Direction_ = parent_->GetInput();
-			parent_->ChangeMotionS(Motion_Dash, true, 1.1f); //モーション変更
+			nowAngle = math::angleFromVector2Deg(my_Input_Direction_.x, my_Input_Direction_.z);
+			if (nowAngle < 0)nowAngle += 360;
+			//急に逆方向にスティック
+			if (abs(180 - abs(previousAngle_ - nowAngle)) < 30
+				&& nowAngle != 0
+				) {
+				SState_ = brake;
+				parent_->ChangeMotionS(Motion_Brake, true); //Brake
+			}
+			else {
+				moveSpeed_ = MIN_SPEED;
+				SState_ = SpeedUp;
+				parent_->ChangeMotionS(Motion_Run, true, 1.1f); //モーション変更
+			}
 		}
+
+		//向いてる方向に速度をかけて加速度にする
+		velocity_ = my_Input_Direction_ * moveSpeed_;
+
 		break;
+
+	case brake:
+		if (moveSpeed_ - ACCELERATION > 0) {
+			moveSpeed_ -= ACCELERATION;
+			//速度調整
+			if (stateStartSpeed > moveSpeed_) {
+				stateStartSpeed = moveSpeed_;
+			}
+		}
+		else {
+			moveSpeed_ = 0;
+			
+			parent_->ChangeMotionS(Motion_Idle, true); //モーション変更
+			if (parent_->input_ != GSvector3::zero()) {
+				SState_ = SpeedUp;
+			}
+			else {
+				SState_ = Stop;
+			}
+		}
+
+		//向いてる方向に速度をかけて加速度にする
+		velocity_ = my_Input_Direction_ * -moveSpeed_;
+		
+		//ジャンプボタンが押されたらステート変更
+		if (InputManager::IsAButtonTrigger()) {
+			cameraLookPoint_ = parent_->GetPosition() + velocity_;
+			parent_->changeState(PlayerStateList::State_Jump);
+			parent_->velocity(GSvector3(my_Input_Direction_.x * 0.1f, 0.40f, my_Input_Direction_.z * 0.1f));
+			parent_->setCameraLookPoint(cameraLookPoint_);
+			parent_->ChangeMotionS(Motion_BackRolling, false); //モーション変更
+			return;
+		}
+
 	}
 
-	//向いてる方向に速度をかけて加速度にする
-	velocity_ = my_Input_Direction_ * moveSpeed_;
+	
 	
 
 	//いろいろ変えちゃった回転方向を親に返す
@@ -178,10 +289,18 @@ void PlayerMoveState::update()
 	//注視点設定
 	parent_->setCameraLookPoint(cameraLookPoint_);
 
-	parent_->setDebugMoveSpeed(moveSpeed_);
+	//向き
+	//parent_->setDebugMoveSpeed(nowAngle);
+	parent_->SetDebugFloat(previousAngle_, nowAngle,moveSpeed_);
+
+	//最後に前のフレームの値をとっておく
+	if (nowAngle != 0.0f) {
+		previousAngle_ = nowAngle;
+	}
 }
 void PlayerMoveState::lateUpdate()
 {
+	
 }
 // 描画
 void PlayerMoveState::draw() const
@@ -191,11 +310,11 @@ void PlayerMoveState::lateDraw() const
 {
 }
 
-void PlayerMoveState::changeAngle() {
+void PlayerMoveState::changeAngle(float time) {
 	//向きの補間
 	GSquaternion rotation =
 		GSquaternion::rotateTowards(
 			parent_->transform().rotation(),
-			GSquaternion::lookRotation(my_Input_Direction_), 12.0f);
+			GSquaternion::lookRotation(my_Input_Direction_), time);
 	parent_->transform().rotation(rotation);
 }

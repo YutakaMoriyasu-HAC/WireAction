@@ -3,6 +3,28 @@
 
 #include <gslib.h>
 #include <vector>
+#include<functional>
+#include<memory>
+
+//アニメーションイベント構造体
+//アニメーションイベント（アニメーションの指定されたタイミングで処理を実行）に関する情報を保持する
+struct AnimationEvent
+{
+	//コンストラクタ
+	AnimationEvent(GSuint motion, GSfloat time, std::function<void()> callback) :
+		motion_{ motion },
+		time_{ time },
+		callback_{ callback }
+	{
+	}
+	//イベントを発生させるモーション番号
+	GSuint motion_;
+	//イベントを発生させるタイミング
+	GSfloat time_;
+	//イベント発生時のコールバック
+	std::function<void()>callback_;
+};
+
 
 //アニメーション付きメッシュクラス
 class AnimatedMesh {
@@ -16,6 +38,7 @@ public:
 	void draw() const;
 	//モーションの変更
 	void change_motion(GSuint motion, bool loop = true);
+	void change_motionS(GSuint motion, bool loop = true, float speed = 1.0f, float lerp = 0.5f, float startTime = 0.0f);
 	//変換行列を設定する
 	void transform(const GSmatrix4& matrix);
 	//モーションが終了しているか？
@@ -30,6 +53,8 @@ public:
 	GSmatrix4 bone_matrices(int bone_no) const;
 
 	const float DefaultLerpTime{ 0.5f };
+
+	void changeModel(GSuint model);
 
 private:
 	//アセットID
@@ -48,11 +73,15 @@ private:
 	GSfloat		prev_motion_timer_;
 	//補間タイマ
 	GSfloat		lerp_timer_;
+	//速度
+	GSfloat		motion_speed_;
 
 	//ボーンのローカル用変換行列
 	std::vector<GSmatrix4> local_bone_matrices_;
 	//ボーンの変換行列
 	std::vector<GSmatrix4> bone_matrices_;
+	//複数のアニメーションイベントを格納するためのvector
+	std::vector<std::unique_ptr<AnimationEvent>>events_;
 };
 
 #endif

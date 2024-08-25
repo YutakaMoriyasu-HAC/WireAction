@@ -76,6 +76,17 @@ public:
 	void setThrowing(bool throwing);
 	bool getThrowing();
 
+	void resetStateTimer();
+
+	//他のコライダーとぶつかっているか取得
+	bool isCollide();
+
+	//デバッグ用
+	void SetDebugFloat(float a = 0, float b = 0, float c = 0, float d = 0, float e = 0);
+
+	//
+	void changeMesh(GSuint model);
+
 private:
 
 
@@ -106,7 +117,7 @@ public:
 private:
 	//アニメーションメッシュ
 	AnimatedMesh	mesh_;
-	//モーション番号
+	//モーション番号we
 	GSuint			motion_;
 	//モーションのループ指定
 	bool			motion_loop_;
@@ -149,6 +160,9 @@ private:
 
 	//ワイヤーを投げているか
 	bool isThrowing_{ false };
+
+	//他のオブジェクトとぶつかっているか
+	bool isCollide_{ false };
 };
 
 #endif

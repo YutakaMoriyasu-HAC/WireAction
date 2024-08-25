@@ -41,6 +41,10 @@ namespace app {
 		/// </summary>
 		/// <param name="stateTag">初期設定するステートの番号</param>
 		void reset(const int stateTag = -1);
+
+		//タイマだけリセット
+		void resetTimer();
+
 		// 更新
 		void update();
 		// 遅延更新

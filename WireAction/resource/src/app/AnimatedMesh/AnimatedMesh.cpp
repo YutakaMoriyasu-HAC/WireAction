@@ -16,25 +16,62 @@ AnimatedMesh::AnimatedMesh(GSuint id, GSuint motion, bool loop, GSuint num_bones
 	prev_motion_timer_{ 0.0f },
 	lerp_timer_{ 0.0f },
 	local_bone_matrices_{ num_bones },
-	bone_matrices_{ num_bones }{
+	bone_matrices_{ num_bones },
+	motion_speed_{ 1.0f } {
 }
 
 
 //更新
 void AnimatedMesh::update(float delta_time) {
-	//モーションタイマの更新
-	motion_timer_ += delta_time;
+	
+
+	//更新前のタイマー値を取っておく
+	GSfloat prev_timer = motion_timer_;
+	// アニメーションタイマの更新
+	motion_timer_ += delta_time * motion_speed_;
 	// ループアニメーションか？
-	if (motion_loop_) {
-		// モーションタイマをループさせる
-		motion_timer_ = std::fmod(motion_timer_, motionEndTime());
+	if (motion_loop_)
+	{
+		// モーションタイマをループさせる           終了時間に加速を
+		motion_timer_ = std::fmod(motion_timer_, motionEndTime() * motion_speed_);
 	}
-	else {
+	else
+	{
 		// モーションタイマをクランプする
 		motion_timer_ = std::min(motion_timer_, motionEndTime() - 1.0f);
 	}
 	// 補間タイマの更新(LerpTime以上にならないようにクランプする）
 	lerp_timer_ = std::min(lerp_timer_ + delta_time, LerpTime);
+	// モーションがループしたかどうか。
+	   // 現在の時間が1フレーム前の時間より小さい場合は、ループしたと判断できる。
+	bool looped = motion_timer_ < prev_timer;
+	// 全イベントをチェックし、必要であればイベントを発行する
+	for (const auto& event : events_)
+	{
+		// 現在のモーションがイベント対象のモーションでなければ、何もしない
+		if (event->motion_ != motion_) continue;
+
+		if (looped)
+		{
+			if (prev_timer < event->time_ || event->time_ <= motion_timer_)
+			{
+				event->callback_(); // コールバック処理を呼び出す
+			}
+		}
+		else
+		{
+			if (prev_timer < event->time_ && event->time_ <= motion_timer_)
+			{
+				event->callback_(); // コールバック処理を呼び出す
+			}
+		}
+	}
+
+
+	if (is_end_motion())
+	{
+		motion_speed_ = 1.0f;
+	}
 }
 
 //描画
@@ -74,7 +111,28 @@ void AnimatedMesh::change_motion(GSuint motion, bool loop) {
 	motion_timer_ = 0.0f;
 	//モーションループフラグの設定
 	motion_loop_ = loop;
+}
 
+//モーションの変更
+void AnimatedMesh::change_motionS(GSuint motion, bool loop, float speed, float lerp, float startTime) {
+	//現在と同じモーションの場合は何もしない
+	if (motion_ == motion) return;
+	//補間中(前半)は、前回のモーションを更新しないようにする
+	if (lerp_timer_ > (LerpTime * lerp)) {
+		//前回のモーション番号とモーション時間を保存
+		prev_motion_ = motion_;
+		prev_motion_timer_ = motion_timer_;
+		//補間中タイマのリセット
+		lerp_timer_ = 0.0f;
+	}
+	//モーションの更新
+	motion_ = motion;
+	//モーションタイマの初期化
+	motion_timer_ = startTime;
+	//モーションループフラグの設定
+	motion_loop_ = loop;
+
+	motion_speed_ = speed;
 }
 
 //座標変換を行う
@@ -119,4 +177,9 @@ float AnimatedMesh::motionEndTime() const {
 //ボーンのワールド変換行列を取得
 GSmatrix4 AnimatedMesh::bone_matrices(int bone_no)const {
 	return bone_matrices_[bone_no] * transform_;
+}
+
+//モデルを変更
+void AnimatedMesh::changeModel(GSuint model) {
+	id_ = model;
 }

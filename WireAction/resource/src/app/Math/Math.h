@@ -109,6 +109,28 @@ namespace math {
 		int multiplier = std::pow(10.0f, decimalPlace);
 		return std::floor(value * multiplier) / multiplier;
 	}
+
+
+	//xとzの値から斜めの長さを求める
+	const static float radiusFromVector2(float x, float z) {
+		return sqrtf((x * x) + (z * z));
+	}
+
+	//xとyとzの値から斜めの長さを求める
+	const static float radiusFromVector3(GSvector3 vector) {
+		return sqrtf((vector.x * vector.x) + (vector.y * vector.y)+ (vector.z * vector.z));
+	}
+
+	//ベクトルからラジアンを求める
+	const static float angleFromVector2Rad(float x, float z) {
+		return atan2f(z, x);
+	}
+
+	//ベクトルから度を求める
+	const static float angleFromVector2Deg(float x, float z) {
+		float answer = atan2f(z, x);
+		return radToDeg(answer);
+	}
 }
 
 #endif

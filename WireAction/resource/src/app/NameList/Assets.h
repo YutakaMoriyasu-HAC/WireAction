@@ -6,6 +6,8 @@ enum {
 	Mesh_Player,		//自機
 	Mesh_Skybox,			//スカイボックス
 	Mesh_Ball,
+	Mesh_EnemyBird,
+	Mesh_PlayerBall,
 };
 
 //テクスチャ

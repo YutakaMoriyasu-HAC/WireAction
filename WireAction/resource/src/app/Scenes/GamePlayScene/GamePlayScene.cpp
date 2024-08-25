@@ -6,6 +6,7 @@
 #include "app/Actors/Player/Player.h"
 #include "app/NameList/Assets.h"
 #include "app/Actors/Ball/Ball.h"
+#include "app/Actors/Enemy/Enemy.h"
 #include <GSstandard_shader.h>
 
 //開始
@@ -18,8 +19,10 @@ void GamePlayScene::start() {
 	is_end_ = false;
 
 	//プレイヤーのメッシュの読み込み
-	gsLoadSkinMesh(Mesh_Player, "resource/Assets/Player2/player2.msh");
+	gsLoadSkinMesh(Mesh_Player, "resource/Assets/PlayerDog/player.msh");
+	gsLoadMesh(Mesh_PlayerBall, "resource/Assets/PlayerDog/playerBall.msh");
 	gsLoadMesh(Mesh_Ball, "resource/Assets/Ball/Ball.msh");
+	gsLoadSkinMesh(Mesh_EnemyBird, "resource/Assets/Enemy/EnemyBird/Enemy_Bird_２.mshb");
 
 	//スカイドーム用のメッシュを読み込む
 	gsLoadMeshFixed(Mesh_Skybox, "resource/Assets/Skybox/skydome.msh");
@@ -46,6 +49,9 @@ void GamePlayScene::start() {
 	world_.add_actor(std::make_shared<Ball>(&world_, GSvector3(0.0f, 6.0f, 0.0f)));
 	world_.add_actor(std::make_shared<Ball>(&world_, GSvector3(-6.0f, 6.0f, -6.0f)));
 	world_.add_actor(std::make_shared<Ball>(&world_, GSvector3(10.0f, 12.0f, -7.0f)));
+
+	//敵
+	world_.add_actor(std::make_shared<Enemy>(&world_, GSvector3(5.0f, 0.5f, 10.0f)));
 
 	//カメラクラスの追加
 	world_.add_camera(std::make_shared<CameraTps>(&world_, GSvector3(8.0f, 3.0f, 0.0f), GSvector3(-5.0f, 0.0f, 0.0f)));
@@ -114,6 +120,8 @@ void GamePlayScene::end() {
 	gsDeleteSkinMesh(Mesh_Player);
 	gsDeleteMesh(Mesh_Skybox);
 	gsDeleteMesh(Mesh_Ball);
+	gsDeleteSkinMesh(Mesh_EnemyBird);
+	gsDeleteMesh(Mesh_PlayerBall);
 	//オクトリーの削除
 	gsDeleteOctree(Octree_Stage);
 	gsDeleteOctree(Octree_Collider);

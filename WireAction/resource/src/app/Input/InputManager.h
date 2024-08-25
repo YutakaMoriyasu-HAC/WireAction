@@ -15,6 +15,8 @@ public:
 	const static GSvector2 CameraRotation();
 	//カメラリセット
 	const static bool IsCameraReset();
+	//しゃがみ
+	const static bool IsCrouchState();
 	// 決定ボタンを押したか
 	const static bool IsDecisionTrigger();
 	// ガードボタンを押したか

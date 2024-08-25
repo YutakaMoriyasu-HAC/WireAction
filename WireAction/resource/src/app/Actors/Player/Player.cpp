@@ -9,6 +9,8 @@
 #include "PlayerThrowWireState.h"
 #include "PlayerPendulumState.h"
 #include "PlayerQuickWireState.h"
+#include "PlayerCrouchState.h"
+#include "PlayerDamageState.h"
 #include "app/Input/InputManager.h"
 #include "app/Actors/WireBeam/WireBeam.h"
 #include <imgui/imgui.h>
@@ -61,7 +63,7 @@ void Player::update(float delta_time) {
 	
 	
 	//モーションを変更
-	mesh_.change_motion(motion_, motion_loop_);
+	mesh_.change_motionS(motion_, motion_loop_,animSpeed_,lerpSize_, startTime_);
 	//メッシュのモーションを更新
 	mesh_.update(delta_time);
 	//ワールド変換行列を設定
@@ -89,12 +91,15 @@ void Player::lateUpdate(float delta_time) {
 
 	ImGui::Begin("Debug");
 
-	//ImGui::Text("canCollideField:%s", canCollideField_ ? "true" : "false");
+	ImGui::Text("motionEnd:%s", IsMotionEnd() ? "true" : "false");
 	ImGui::Text("velocityY:%f", velocity_.y);
 	ImGui::Text("centerPendulumX:%f", centerPendulum_.x);
 	ImGui::Text("playerz:%f", transform_.position().z);
-	ImGui::Text("playerSpeed:%f", debugMoveSpeed_);
-	ImGui::Text("playerSpeed:%d", isWall_);
+	ImGui::Text("direction(deg):%f", debugFloat_[0]);
+	ImGui::Text("direction(now):%f", debugFloat_[1]);
+	ImGui::Text("movespeed:%f", debugFloat_[2]);
+	ImGui::Text("%f", abs(180 - abs(debugFloat_[0] - debugFloat_[1])));
+	ImGui::Text("isWall:%d", isWall_);
 
 	ImGui::End();
 	
@@ -115,22 +120,22 @@ void Player::draw() const {
 //衝突リアクション
 void Player::react(Actor& other) {
 
-	//敵の攻撃判定と衝突したか？
-	if (other.tag() == "EnemyAttackTag") {
-		//ターゲット方向のベクトルを求める
-		GSvector3 to_target = other.transform().position() - transform().position();
-		//y成分は無効にする
-		to_target.y = 0.0f;
-		//ターゲット方向と逆方向にノックバックする移動量を求める
-		velocity_ = -to_target.getNormalized() * 0.4f;
-		//ダメージ状態に遷移する
-		//change_state(State::Damage, MotionDamage, false);
-		return;
-	}
+	
 	//敵と衝突したか？
 	if (other.tag() == "EnemyTag") {
 		//アクター同士が重ならないように補正する
-		collide_actor(other);
+		//collide_actor(other);
+		if (stateMachine_.getNowStateID() != State_QuickWire) {
+			changeState(PlayerStateList::State_Damage);
+			isCollide_ = false;
+			return;
+		}
+
+
+		isCollide_ = true;
+	}
+	else {
+		isCollide_ = false;
 	}
 
 	
@@ -256,6 +261,8 @@ void Player::InitState() {
 	stateMachine_.addState(PlayerStateList::State_ThrowWire, std::make_shared<PlayerThrowWireState>(this, world_, &stateMachine_));
 	stateMachine_.addState(PlayerStateList::State_Pendulum, std::make_shared<PlayerPendulumState>(this, world_, &stateMachine_));
 	stateMachine_.addState(PlayerStateList::State_QuickWire, std::make_shared<PlayerQuickWireState>(this, world_, &stateMachine_));
+	stateMachine_.addState(PlayerStateList::State_Crouch, std::make_shared<PlayerCrouchState>(this, world_, &stateMachine_));
+	stateMachine_.addState(PlayerStateList::State_Damage, std::make_shared<PlayerDamageState>(this, world_, &stateMachine_));
 
 
 	// ステートマシンの初期化
@@ -374,4 +381,25 @@ void Player::setThrowing(bool throwing) {
 
 bool Player::getThrowing() {
 	return isThrowing_;
+}
+
+void Player::resetStateTimer() {
+	stateMachine_.resetTimer();
+}
+
+bool Player::isCollide() {
+	return isCollide_;
+}
+
+void Player::changeMesh(GSuint model) {
+	mesh_.changeModel(model);
+	
+}
+
+void Player::SetDebugFloat(float a, float b, float c, float d, float e) {
+	debugFloat_[0] = a;
+	debugFloat_[1] = b;
+	debugFloat_[2] = c;
+	debugFloat_[3] = d;
+	debugFloat_[4] = e;
 }

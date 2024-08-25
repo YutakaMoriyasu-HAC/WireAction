@@ -125,7 +125,7 @@ void PlayerPendulumState::update()
         cameraLookPoint_ = parent_->GetPosition() + velocity_;
         parent_->changeState(PlayerStateList::State_Jump);
         parent_->setCameraLookPoint(cameraLookPoint_);
-        parent_->ChangeMotionS(Motion_Jump, false); //モーション変更
+        parent_->ChangeMotionS(Motion_JumpIn, false); //モーション変更
 
         // モーションの変更
         // 移動量のxy成分だけ更新
@@ -144,6 +144,7 @@ void PlayerPendulumState::update()
 
     }
 
+    
 
 	w_ = G * M; //重力[N]
 
@@ -340,6 +341,7 @@ void PlayerPendulumState::update()
     my_Input_Direction_.y = 0;
     parent_->SetInputDirection(my_Input_Direction_);
 
+    changeAngle();
 
 	return;
 }
@@ -353,7 +355,7 @@ void PlayerPendulumState::draw() const
     GSvector2 startPoint = GSvector2::zero();
     GSvector2 endPoint = GSvector2::zero();
     GSvector3 handPosition = position_;
-    handPosition.y += 1.5f; //手の位置のオフセット
+    handPosition.y += 0.5f; //手の位置のオフセット
     GSvector3 centerPosition = wirePosition_;
 
     //それぞれの座標を画面座標に変換
@@ -364,9 +366,6 @@ void PlayerPendulumState::draw() const
     if (startPoint.x > 10000) {
         startPoint.x -= 20000.0f;
     }
-    /*if (startPoint.y< 0) {
-        startPoint.y += 1080.0f;
-    }*/
 
 
     //画像の中心決定
@@ -398,7 +397,7 @@ void PlayerPendulumState::changeAngle() {
 	GSquaternion rotation =
 		GSquaternion::rotateTowards(
 			parent_->transform().rotation(),
-			GSquaternion::lookRotation(my_Input_Direction_), 12.0f);
+			GSquaternion::lookRotation(GSvector3(cosf(phi_),0,sinf(phi_))), 12.0f);
 	parent_->transform().rotation(rotation);
 }
 
