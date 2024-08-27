@@ -28,6 +28,8 @@ private:
 
 	//ï‚ê≥ÇµÇΩíçéãì_
 	GSvector3 smoothPlayerLookPos_{ 0,0,0 };
+
+	
 };
 
 #endif 

@@ -2,6 +2,7 @@
 #define BOUNDING_SPHERE_H_
 
 #include<gslib.h>
+#include "app/Ray/Line.h"
 
 //境界球クラス
 class BoundingSphere {
@@ -14,6 +15,7 @@ public:
 	BoundingSphere transform(const GSmatrix4& matrix) const;
 	//重なってるか
 	bool intersects(const BoundingSphere& other) const;
+	bool intersects(const Line& other, GSvector3* intersect) const;
 	//デバッグ表示
 	void draw() const;
 	// 判定が有効か

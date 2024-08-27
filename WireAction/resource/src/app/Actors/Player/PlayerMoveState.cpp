@@ -235,8 +235,8 @@ void PlayerMoveState::update()
 		break;
 
 	case brake:
-		if (moveSpeed_ - ACCELERATION > 0) {
-			moveSpeed_ -= ACCELERATION;
+		if (moveSpeed_ - ACCELERATION*2 > 0) {
+			moveSpeed_ -= ACCELERATION*2;
 			//‘¬“x’²®
 			if (stateStartSpeed > moveSpeed_) {
 				stateStartSpeed = moveSpeed_;

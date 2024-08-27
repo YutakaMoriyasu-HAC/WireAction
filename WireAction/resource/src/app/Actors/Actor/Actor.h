@@ -6,6 +6,7 @@
 #include <string>
 #include "app/BoundingSpheres/BoundingSphere.h"
 #include "app/Tween/Tween.h"
+#include "app/Ray/Line.h"
 
 class IWorld;	//ワールド抽象インターフェースの前方宣言
 
@@ -32,6 +33,8 @@ public:
 	virtual void handle_message(const std::string& message, void* param);
 	//衝突判定
 	void collide(Actor& other);
+	//線分との衝突判定
+	bool collide(const Line& line, GSvector3* intersect) const;
 	//死亡する
 	void die();
 	//衝突しているか？
@@ -42,6 +45,8 @@ public:
 	const std::string& name() const;
 	//タグ名を取得
 	const std::string& tag() const;
+	//攻撃状態を取得
+	const bool& attackState() const;
 	//トランスフォームを取得(const版)
 	const GStransform& transform() const;
 	//トランスフォームを取得
@@ -56,6 +61,7 @@ public:
 	// 指定された場所までTweenで移動する
 	TweenUnit& move_to(const GSvector3& to, float duration);
 
+	
 	//コピー禁止
 	Actor(const Actor& other) = default;
 	Actor& operator = (const Actor& other) = delete;
@@ -69,6 +75,8 @@ protected:
 	std::string ownerTag_;
 	//名前
 	std::string		name_;
+	//攻撃状態
+	bool		attackState_{false};
 	//トランスフォーム
 	GStransform		transform_;
 	//移動量

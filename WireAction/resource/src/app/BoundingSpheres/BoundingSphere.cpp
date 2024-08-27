@@ -1,5 +1,6 @@
 #include "app/BoundingSpheres/BoundingSphere.h"
 
+
 //コンストラクタ
 BoundingSphere::BoundingSphere(float radius,const GSvector3& center) :
 	radius_{ radius }, center_{ center }, enable_{ true } {
@@ -20,6 +21,12 @@ BoundingSphere BoundingSphere::transform(const GSmatrix4& matrix) const {
 bool BoundingSphere::intersects(const BoundingSphere& other) const {
     return gsCollisionSphereAndSphere(
         &center_, radius_, &other.center_, other.radius_) == GS_TRUE;
+}
+
+// 交差しているか？
+bool BoundingSphere::intersects(const Line& other, GSvector3* intersect) const {
+    return gsCollisionSphereAndLine(
+        &center_, radius_, &other.start, &other.end, intersect) == GS_TRUE;
 }
 
 // 判定が有効か

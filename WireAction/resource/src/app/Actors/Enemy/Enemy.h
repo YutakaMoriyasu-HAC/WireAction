@@ -25,6 +25,7 @@ private:
 
 	//モーションのループ指定
 	bool			motion_loop_;
+	float timer_{ 0.0f };
 
 };
 

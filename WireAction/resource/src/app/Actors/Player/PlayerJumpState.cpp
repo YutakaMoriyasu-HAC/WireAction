@@ -62,6 +62,19 @@ void PlayerJumpState::update()
 		parent_->ChangeMotionS(Motion_JumpNow, true, 0.1f); //モーション変更
 	}
 
+	//敵を踏んづけたとき
+	if (parent_->isTrampled(0)) {
+		
+		cameraLookPoint_.y = (cameraLookPoint_.y + parent_->GetPosition().y) / 2;
+		if (InputManager::IsAButtonState()) {
+			parent_->velocity().y = 0.35f;
+		}
+		else {
+			parent_->velocity().y = 0.23f;
+		}
+		return;
+	}
+
 
 
 	//空中ジャンプ

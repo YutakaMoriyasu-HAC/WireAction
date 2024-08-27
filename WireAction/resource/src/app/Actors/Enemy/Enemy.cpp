@@ -15,7 +15,7 @@ Enemy::Enemy(IWorld* world, const GSvector3& position) :
 	tag_ = "EnemyTag";
 	name_ = "EnemyBird";
 	//Õ“Ë”»’è‹…‚ÌÝ’è
-	collider_ = BoundingSphere{ 0.5f };
+	collider_ = BoundingSphere{ 0.4f };
 }
 
 void Enemy::update(float delta_time) {
@@ -24,6 +24,13 @@ void Enemy::update(float delta_time) {
 	mesh_.update(delta_time);
 	//ƒƒbƒVƒ…‚Ì•ÏŠ·s—ñ‚ð‰Šú‰»
 	mesh_.transform(transform_.localToWorldMatrix());
+
+	if (timer_ > 0) {
+		timer_--;
+		if (timer_ <= 0) {
+			die();
+		}
+	}
 
 }
 
@@ -34,8 +41,11 @@ void Enemy::draw() const {
 }
 
 void Enemy::react(Actor& other) {
-	if (other.name() == "Player") {
+
+	if (other.name() == "Player" && other.attackState()) {
+		
 		transform_.localScale(GSvector3(2, 0.4, 2));
+		timer_ = 50.0f;
 		
 	}
 }

@@ -11,6 +11,7 @@
 const GSvector3 ReferencePointOffset{ 0.0f,1.7f,0.0f };
 float cameraDistance_{ 15.0f };
 
+
 CameraTps::CameraTps(IWorld* world, const GSvector3& position, const GSvector3& at) :
 	Actor()
 {
@@ -41,7 +42,6 @@ void CameraTps::update(float delta_time)
 	//プレイヤー取得
 	//find_actorはActorクラスで取ってきてしまうのでdynamic_pointer_castでPlayerクラスに変える
 	std::shared_ptr<Player> player = std::dynamic_pointer_cast<Player>(world_->find_actor("Player"));
-
 	//注視点取得
 	smoothPlayerLookPos_ = player->getCameraLookPoint();
 	float smoothPercent = 10.0f;

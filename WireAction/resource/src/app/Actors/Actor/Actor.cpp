@@ -34,6 +34,11 @@ void Actor::collide(Actor& other) {
 	}
 }
 
+//線分との衝突判定
+bool Actor::collide(const Line& line, GSvector3* intersect) const {
+	return collider().intersects(line, intersect);
+}
+
 //死亡する
 void Actor::die() {
 	dead_ = true;
@@ -57,6 +62,11 @@ const std::string& Actor::name() const {
 //タグ名を取得
 const std::string& Actor::tag() const {
 	return tag_;
+}
+
+//攻撃状態を取得
+const bool& Actor::attackState() const {
+	return attackState_;
 }
 
 //トランスフォームを取得(const版)

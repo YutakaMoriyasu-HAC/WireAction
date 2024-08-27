@@ -75,7 +75,14 @@ void Player::update(float delta_time) {
 
 	//移動
 	SetPosition(transform_.position() + velocity_);
-	//transform_.translate(velocity_);
+	
+	if (stateMachine_.getNowStateID() == State_QuickWire) {
+		attackState_ = true;
+	}
+	else {
+		attackState_ = false;
+	}
+
 }
 
 void Player::lateUpdate(float delta_time) {
@@ -100,6 +107,7 @@ void Player::lateUpdate(float delta_time) {
 	ImGui::Text("movespeed:%f", debugFloat_[2]);
 	ImGui::Text("%f", abs(180 - abs(debugFloat_[0] - debugFloat_[1])));
 	ImGui::Text("isWall:%d", isWall_);
+	ImGui::Text("trampled:%d", trampled_);
 
 	ImGui::End();
 	
@@ -119,20 +127,31 @@ void Player::draw() const {
 
 //衝突リアクション
 void Player::react(Actor& other) {
-
 	
 	//敵と衝突したか？
 	if (other.tag() == "EnemyTag") {
-		//アクター同士が重ならないように補正する
-		//collide_actor(other);
-		if (stateMachine_.getNowStateID() != State_QuickWire) {
-			changeState(PlayerStateList::State_Damage);
-			isCollide_ = false;
-			return;
-		}
-
 
 		isCollide_ = true;
+
+		//地面との衝突判定(線分との交差判定)
+		GSvector3 position = transform_.position();
+		
+
+		if (other.transform().position().y<position.y && footOffset_ < 0 && !isGround_) {
+			attackState_ = true;
+			trampled_ = true;
+			return;
+		}
+		else {
+			//踏んづけてない！
+			attackState_ = false;
+			//ダメージ
+			if (stateMachine_.getNowStateID() != State_QuickWire) {
+				changeState(PlayerStateList::State_Damage);
+				isCollide_ = false;
+				return;
+			}
+		}
 	}
 	else {
 		isCollide_ = false;
@@ -232,6 +251,7 @@ void Player::collide_field() {
 	else {
 		isGround_ = false;
 	}
+
 }
 
 //アクターとの衝突処理
@@ -375,18 +395,22 @@ void Player::setDebugMoveSpeed(float speed) {
 	debugMoveSpeed_ = speed;
 }
 
+//投げてる
 void Player::setThrowing(bool throwing) {
 	isThrowing_ = throwing;
 }
 
+//投げてる
 bool Player::getThrowing() {
 	return isThrowing_;
 }
 
+//アニメーションタイマリセット
 void Player::resetStateTimer() {
 	stateMachine_.resetTimer();
 }
 
+//敵に触れてるか
 bool Player::isCollide() {
 	return isCollide_;
 }
@@ -402,4 +426,12 @@ void Player::SetDebugFloat(float a, float b, float c, float d, float e) {
 	debugFloat_[2] = c;
 	debugFloat_[3] = d;
 	debugFloat_[4] = e;
+}
+
+bool Player::isTrampled(int trampleSwitch) {
+	bool re = trampled_;
+	if(trampleSwitch>=0)trampled_ = trampleSwitch;
+
+
+	return re;
 }

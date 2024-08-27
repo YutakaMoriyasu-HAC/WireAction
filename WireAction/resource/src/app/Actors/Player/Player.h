@@ -87,6 +87,9 @@ public:
 	//
 	void changeMesh(GSuint model);
 
+	//敵を踏みつぶしたか
+	bool isTrampled(int trampleSwitch=-1);
+
 private:
 
 
@@ -163,6 +166,9 @@ private:
 
 	//他のオブジェクトとぶつかっているか
 	bool isCollide_{ false };
+
+	//踏みつぶしたか
+	bool trampled_{ false };
 };
 
 #endif
