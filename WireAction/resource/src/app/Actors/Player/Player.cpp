@@ -11,6 +11,7 @@
 #include "PlayerQuickWireState.h"
 #include "PlayerCrouchState.h"
 #include "PlayerDamageState.h"
+#include "PlayerBodyAttackState.h"
 #include "app/Input/InputManager.h"
 #include "app/Actors/WireBeam/WireBeam.h"
 #include <imgui/imgui.h>
@@ -24,15 +25,17 @@ const float PlayerHeight{ 1.0f };
 const float PlayerRadius{ 0.5f };
 //足元のオフセット
 //const float FootOffset{ 0.1f };
-//重力値
-const float Gravity{ -0.016f }; //-0.016 //-0.008
+
+
+//ミスとなるy座標
+const float MissPosition_{ -30.0f };
 
 
 //コンストラクタ
 Player::Player(IWorld* world, const GSvector3& position) :
 	mesh_{ Mesh_Player, 0, true },
 	motion_{ Motion_Idle },
-	motion_loop_{ true },
+	motionLoop_{ true },
 	state_timer_{ 0.0f } {
 	//ワールドを設定
 	world_ = world;
@@ -49,6 +52,7 @@ Player::Player(IWorld* world, const GSvector3& position) :
 
 	InitState();
 	lerpSize_ = mesh_.DefaultLerpTime;
+	lastPosition_ = position;
 
 	
 }
@@ -63,7 +67,7 @@ void Player::update(float delta_time) {
 	
 	
 	//モーションを変更
-	mesh_.change_motionS(motion_, motion_loop_,animSpeed_,lerpSize_, startTime_);
+	mesh_.change_motionS(motion_, motionLoop_,animSpeed_,lerpSize_, startTime_, motionEndTimePlus_);
 	//メッシュのモーションを更新
 	mesh_.update(delta_time);
 	//ワールド変換行列を設定
@@ -76,11 +80,30 @@ void Player::update(float delta_time) {
 	//移動
 	SetPosition(transform_.position() + velocity_);
 	
-	if (stateMachine_.getNowStateID() == State_QuickWire) {
+	if (stateMachine_.getNowStateID() == State_QuickWire||
+		stateMachine_.getNowStateID() == State_BodyAttack ||
+		GetMotionState()==Motion_Rolling) {
 		attackState_ = true;
 	}
 	else {
 		attackState_ = false;
+	}
+
+	//奈落に落ちたとき
+	if (transform_.position().y < MissPosition_) {
+		velocity_ = GSvector3::zero();
+		GSvector3 finalPosition = lastPosition_;
+		finalPosition.y += 1.5f;
+		transform_.position(lastPosition_);
+	}
+
+	//無敵時間
+	if (invincibleTimer_ > 0) {
+		invincibleTimer_ -= delta_time;
+		if (invincibleTimer_ <= 0) {
+			invincibleTimer_ = 0;
+			isInvincible_ = false;
+		}
 	}
 
 }
@@ -108,6 +131,11 @@ void Player::lateUpdate(float delta_time) {
 	ImGui::Text("%f", abs(180 - abs(debugFloat_[0] - debugFloat_[1])));
 	ImGui::Text("isWall:%d", isWall_);
 	ImGui::Text("trampled:%d", trampled_);
+	ImGui::Text("motionTime:%f", mesh_.motion_time());
+	ImGui::Text("motioin:%d", motion_);
+	ImGui::Text("motioinEndTime:%f", mesh_.motionEndTime());
+	ImGui::Text("motionEnd:%s", canWallKick_ ? "true" : "false");
+
 
 	ImGui::End();
 	
@@ -128,6 +156,8 @@ void Player::draw() const {
 //衝突リアクション
 void Player::react(Actor& other) {
 	
+	if (isInvincible_)return;
+
 	//敵と衝突したか？
 	if (other.tag() == "EnemyTag") {
 
@@ -137,18 +167,22 @@ void Player::react(Actor& other) {
 		GSvector3 position = transform_.position();
 		
 
-		if (other.transform().position().y<position.y && footOffset_ < 0 && !isGround_) {
+		if (other.transform().position().y<position.y+1.5f && !isGround_) {
 			attackState_ = true;
 			trampled_ = true;
 			return;
 		}
 		else {
-			//踏んづけてない！
-			attackState_ = false;
 			//ダメージ
-			if (stateMachine_.getNowStateID() != State_QuickWire) {
+			if (!attackState_) {
 				changeState(PlayerStateList::State_Damage);
 				isCollide_ = false;
+				if (stateMachine_.getNowStateID() == PlayerStateList::State_Walk) {
+					lastPosition_ = transform_.position();
+				}
+				//無敵になる
+				startInvincibilityTime();
+				
 				return;
 			}
 		}
@@ -163,7 +197,8 @@ void Player::react(Actor& other) {
 // モーションが終了しているか
 const bool Player::IsMotionEnd() const
 {
-	return stateMachine_.getNowStateTimer() >= GetMotionEndTime();
+	//return stateMachine_.getNowStateTimer() >= GetMotionEndTime();
+	return mesh_.is_end_motion();
 }
 
 //モーション変更、速度も変更
@@ -227,9 +262,25 @@ void Player::collide_field() {
 		//補正後の座標に変更する
 		transform_.position(center);
 		isWall_ = true;
+
+		GSvector3 position = transform_.position();
+		Line wallLine;
+		wallLine.start = position + collider_.center_;
+		wallLine.end = position + collider_.center_ + GetInput();
+		GSvector3 intersect;	//地面との交点
+		if (world_->field()->collide(wallLine, &intersect)) {
+			canWallKick_ = true;
+			wallKickPosition_ = intersect;
+		}
+		else {
+			canWallKick_ = false;
+		}
+
+
 	}
 	else {
 		isWall_ = false;
+		canWallKick_ = false;
 	}
 
 	//地面との衝突判定(線分との交差判定)
@@ -254,25 +305,7 @@ void Player::collide_field() {
 
 }
 
-//アクターとの衝突処理
-void Player::collide_actor(Actor& other) {
-	//y座標を除く座標を求める
-	GSvector3 position = transform_.position();
-	position.y = 0.0f;
-	GSvector3 target = other.transform().position();
-	target.y = 0.0f;
-	//相手との距離
-	float distance = GSvector3::distance(position, target);
-	//衝突判定球の半径同士を加えた長さを求める
-	float length = collider_.radius_ + other.collider().radius_;
-	//衝突判定球の重なっている長さを求める
-	float overlap = length - distance;
-	//重なっている部分の半分の距離だけ離れる移動量を求める
-	GSvector3 v = (position - target).getNormalized() * overlap * 0.5f;
-	transform_.translate(v, GStransform::Space::World);
-	//フィールドとの衝突判定
-	collide_field();
-}
+
 
 //ステート管理
 void Player::InitState() {
@@ -283,6 +316,7 @@ void Player::InitState() {
 	stateMachine_.addState(PlayerStateList::State_QuickWire, std::make_shared<PlayerQuickWireState>(this, world_, &stateMachine_));
 	stateMachine_.addState(PlayerStateList::State_Crouch, std::make_shared<PlayerCrouchState>(this, world_, &stateMachine_));
 	stateMachine_.addState(PlayerStateList::State_Damage, std::make_shared<PlayerDamageState>(this, world_, &stateMachine_));
+	stateMachine_.addState(PlayerStateList::State_BodyAttack, std::make_shared<PlayerBodyAttackState>(this, world_, &stateMachine_));
 
 
 	// ステートマシンの初期化
@@ -378,10 +412,7 @@ void Player::setBeamDirection(GSvector3 direction) {
 	beamDirection_.y = transform_.position().y + 1.5f;
 }
 
-void Player::gravityFall(float delta_time) {
-	//重力値を更新
-	velocity_.y += Gravity * delta_time;
-}
+
 
 void Player::setCenterPendulum(GSvector3 center) {
 	centerPendulum_ = center;
@@ -434,4 +465,20 @@ bool Player::isTrampled(int trampleSwitch) {
 
 
 	return re;
+}
+
+//壁キック時に壁の座標を返す
+bool Player::canWallKick() {
+	//kickPosition = &wallKickPosition_;
+	return canWallKick_;
+}
+
+void Player::setLastPosition(GSvector3 position) {
+	lastPosition_ = position;
+}
+
+//無敵時間開始
+void Player::startInvincibilityTime() {
+	invincibleTimer_ = 120.0f;
+	isInvincible_ = true;
 }

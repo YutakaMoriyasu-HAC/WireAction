@@ -29,6 +29,9 @@ private:
 	//•â³‚µ‚½’‹“_
 	GSvector3 smoothPlayerLookPos_{ 0,0,0 };
 
+	//‚±‚ê‚ªtrue‚¾‚ÆƒJƒƒ‰‚ğ“®‚©‚¹‚È‚¢(c‚¾‚¯?)
+	bool canNotCameraFlag_{ false };
+
 	
 };
 

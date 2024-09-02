@@ -335,8 +335,7 @@ void PlayerPendulumState::update()
 
     //U‚èŽq‚ÌŒü‚«‚ðŽålŒö‚ªŒü‚¢‚Ä‚é•ûŒü‚É‚·‚é(‚±‚ê‚ð‚â‚ç‚È‚¢‚Æ³‚µ‚­Œ¸Š‚µ‚È‚¢)
     //U‚èŽq‚ÌƒxƒNƒgƒ‹‚ð³‹K‰»‚·‚é
-    float norm = sqrtf(velocity_.x * velocity_.x + velocity_.z * velocity_.z);
-    float mag = 1.0f / norm;
+    float mag = math::normal(velocity_.x, velocity_.z);
     my_Input_Direction_ = (velocity_ * mag);
     my_Input_Direction_.y = 0;
     parent_->SetInputDirection(my_Input_Direction_);

@@ -61,6 +61,8 @@ private:
 
 	//カメラの注視点(ジャンプで変わるため変数にしておく)
 	GSvector3 cameraLookPoint_{ 0,0,0 };
+	//壁キック中
+	bool isWallKick_{ false };
 };
 
 

@@ -51,8 +51,8 @@ const GSvector2 InputManager::CameraRotation()
     // ÉLÅ[ì¸óÕ
     if (gsGetKeyTrigger(GKEY_UPARROW)) direct.y = 1;
     else if (gsGetKeyTrigger(GKEY_DOWNARROW)) direct.y = -1;
-    if (gsGetKeyState(GKEY_LEFTARROW)) direct.x = -1;
-    else if (gsGetKeyState(GKEY_RIGHTARROW)) direct.x = 1;
+    if (gsGetKeyTrigger(GKEY_LEFTARROW)) direct.x = -23;
+    else if (gsGetKeyTrigger(GKEY_RIGHTARROW)) direct.x = 23;
     return direct;
 }
 

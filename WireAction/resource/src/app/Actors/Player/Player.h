@@ -62,8 +62,7 @@ public:
 	//ビームを出す方向を決定
 	void setBeamDirection(GSvector3 direction);
 
-	//自然落下
-	void gravityFall(float delta_time);
+	
 
 
 	//振り子の中心をセット
@@ -88,7 +87,17 @@ public:
 	void changeMesh(GSuint model);
 
 	//敵を踏みつぶしたか
-	bool isTrampled(int trampleSwitch=-1);
+	bool isTrampled(int trampleSwitch = -1);
+
+	//壁キック可能なら壁の座標を返す
+	bool canWallKick();
+
+	//最後にいた足場をセット
+	void setLastPosition(GSvector3 position);
+
+	//無敵時間さん
+	void startInvincibilityTime();
+
 
 private:
 
@@ -98,8 +107,7 @@ private:
 
 	//フィールドとの衝突処理
 	void collide_field();
-	//アクターとの衝突処理
-	void collide_actor(Actor& other);
+	
 
 	// ステートの初期化
 	void InitState();
@@ -111,7 +119,7 @@ private:
 	// 移動入力
 	GSvector3 MoveInput();
 
-	
+
 
 public:
 	GSvector3 input_ = { 0,0,0 };	//入力1
@@ -122,8 +130,6 @@ private:
 	AnimatedMesh	mesh_;
 	//モーション番号we
 	GSuint			motion_;
-	//モーションのループ指定
-	bool			motion_loop_;
 	//状態タイマ
 	float			state_timer_;
 
@@ -150,11 +156,11 @@ private:
 
 	float debugFloat_[7]{ 0.0f,0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
 
-	GSvector3 beamDirection_ { GSvector3::zero()};
+	GSvector3 beamDirection_{ GSvector3::zero() };
 
 	//地面と衝突判定するか
 	bool canCollideField_{ true };
-	
+
 	float footOffset_{ -1.0f };
 
 	GSvector3 centerPendulum_{ GSvector3::zero() };
@@ -169,6 +175,18 @@ private:
 
 	//踏みつぶしたか
 	bool trampled_{ false };
+
+	//壁キック可能
+	bool canWallKick_{ false };
+	//壁キック座標
+	GSvector3 wallKickPosition_{0, 0, 0};
+
+	//最後にいた座標
+	GSvector3 lastPosition_{ 0,0,0 };
+
+	//無敵かどうか
+	bool isInvincible_{ false };
+	float invincibleTimer_{ 0.0f };
 };
 
 #endif

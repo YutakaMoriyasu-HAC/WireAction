@@ -116,6 +116,11 @@ namespace math {
 		return sqrtf((x * x) + (z * z));
 	}
 
+	//x‚Æz‚Ì’l‚©‚çÎ‚ß‚Ì’·‚³‚ğ‹‚ß‚é
+	const static float radiusFromVector2(GSvector3 vector) {
+		return sqrtf((vector.x * vector.x) + (vector.z * vector.z));
+	}
+
 	//x‚Æy‚Æz‚Ì’l‚©‚çÎ‚ß‚Ì’·‚³‚ğ‹‚ß‚é
 	const static float radiusFromVector3(GSvector3 vector) {
 		return sqrtf((vector.x * vector.x) + (vector.y * vector.y)+ (vector.z * vector.z));
@@ -130,6 +135,13 @@ namespace math {
 	const static float angleFromVector2Deg(float x, float z) {
 		float answer = atan2f(z, x);
 		return radToDeg(answer);
+	}
+
+	//³‹K‰»
+	const static float normal(float x, float y) {
+		float norm = radiusFromVector2(x, y);
+		float magnitude = 1.0f / norm;
+		return magnitude;
 	}
 }
 

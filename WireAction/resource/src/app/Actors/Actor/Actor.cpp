@@ -39,6 +39,26 @@ bool Actor::collide(const Line& line, GSvector3* intersect) const {
 	return collider().intersects(line, intersect);
 }
 
+//アクターとの衝突処理
+void Actor::collide_actor(Actor& other) {
+	//y座標を除く座標を求める
+	GSvector3 position = transform_.position();
+	position.y = 0.0f;
+	GSvector3 target = other.transform().position();
+	target.y = 0.0f;
+	//相手との距離
+	float distance = GSvector3::distance(position, target);
+	//衝突判定球の半径同士を加えた長さを求める
+	float length = collider_.radius_ + other.collider().radius_;
+	//衝突判定球の重なっている長さを求める
+	float overlap = length - distance;
+	//重なっている部分の半分の距離だけ離れる移動量を求める
+	GSvector3 v = (position - target).getNormalized() * overlap * 0.5f;
+	transform_.translate(-v, GStransform::Space::World);
+	//フィールドとの衝突判定
+	//collide_field();
+}
+
 //死亡する
 void Actor::die() {
 	dead_ = true;
@@ -103,4 +123,9 @@ TweenUnit& Actor::move_to(const GSvector3& to, float duration) {
 	// 現在の場所から指定された場所まで、Tweenで移動する
 	return Tween::vector3(transform_.position(), to, duration,
 		[=](GSvector3 pos) {transform_.position(pos); });
+}
+
+void Actor::gravityFall(float delta_time) {
+	//重力値を更新
+	velocity_.y += Gravity * delta_time;
 }

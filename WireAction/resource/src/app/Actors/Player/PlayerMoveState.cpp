@@ -26,7 +26,13 @@ void PlayerMoveState::init()
 {
 	
 	my_Input_Direction_ = parent_->GetInput();
-	parent_->ChangeMotionS(Motion_Idle, true); //モーション変更
+	if (parent_->GetMotionState() == Motion_Rolling) {
+		rowSpeedKoroKoro_ = true;
+	}
+	else {
+		parent_->ChangeMotionS(Motion_Idle, true, 1.0f + moveSpeed_); //モーション変更
+	}
+	
 
 	//カメラ座標
 	cameraLookPoint_ = parent_->getCameraLookPoint();
@@ -66,11 +72,14 @@ void PlayerMoveState::update()
 
 	//ジャンプボタンが押されたらステート変更
 	if (InputManager::IsAButtonTrigger() && SState_!=brake) {
-		cameraLookPoint_ = parent_->GetPosition() + velocity_;
+		GSvector3 lastPosition = parent_->GetPosition();
+		cameraLookPoint_ = lastPosition + velocity_;
 		parent_->changeState(PlayerStateList::State_Jump);
 		parent_->velocity().y = 0.32f; //0.18
 		parent_->setCameraLookPoint(cameraLookPoint_);
 		parent_->ChangeMotionS(Motion_JumpIn, false); //モーション変更
+		rowSpeedKoroKoro_ = false;
+		parent_->setLastPosition(lastPosition);
 		return;
 	}
 
@@ -78,6 +87,11 @@ void PlayerMoveState::update()
 	if (!parent_->isGround()) {
 		parent_->changeState(PlayerStateList::State_Jump);
 		parent_->setCameraLookPoint(cameraLookPoint_);
+		rowSpeedKoroKoro_ = false;
+		//落ちる前の移動量を計算
+		GSvector3 lastPositionDirection = parent_->GetPosition() - previousPosition_;
+		//parent_->setLastPosition(previousPosition_-(lastPositionDirection*10));
+		parent_->setLastPosition(previousPosition_);
 		return;
 	}
 
@@ -89,7 +103,7 @@ void PlayerMoveState::update()
 		parent_->setBeamDirection(my_Input_Direction_);
 		parent_->changeState(PlayerStateList::State_ThrowWire);
 		parent_->ChangeMotionS(Motion_JumpNow, false); //モーション変更
-
+		rowSpeedKoroKoro_ = false;
 
 		cameraLookPoint_.x = parent_->GetPosition().x + velocity_.x;
 		cameraLookPoint_.z = parent_->GetPosition().z + velocity_.z;
@@ -104,7 +118,15 @@ void PlayerMoveState::update()
 		parent_->setCameraLookPoint(cameraLookPoint_);
 		parent_->changeState(PlayerStateList::State_Crouch);
 		parent_->ChangeMotionS(Motion_Crouch, true); //モーション変更
+		rowSpeedKoroKoro_ = false;
 		return;
+	}
+
+	//低速ころころ終了
+	if (parent_->IsMotionEnd() && rowSpeedKoroKoro_) {
+		rowSpeedKoroKoro_ = false;
+		parent_->ChangeMotionS(Motion_Run, true,1.0f+moveSpeed_); //モーション変更
+		parent_->resetStateTimer();
 	}
 
 	//座標取得
@@ -121,10 +143,10 @@ void PlayerMoveState::update()
 		moveSpeed_ = 0;
 		
 		//スティックが倒された瞬間
-		if (parent_->input2_ == GSvector3::zero() && parent_->input_ != GSvector3::zero()) {
+		if (parent_->input_ != GSvector3::zero()) {
 			moveSpeed_ = MIN_SPEED;
 			SState_ = SpeedUp;
-			parent_->ChangeMotionS(Motion_Run, true, 1.1f); //モーション変更
+			parent_->ChangeMotionS(Motion_Run, true, 1.0f + moveSpeed_); //モーション変更
 			my_Input_Direction_ = parent_->GetInput();
 		}
 
@@ -158,9 +180,9 @@ void PlayerMoveState::update()
 			stateStartSpeed = moveSpeed_;
 			
 
-		}else if (parent_->GetMotionState() != Motion_Run) {
+		}else if (parent_->GetMotionState() != Motion_Run && !rowSpeedKoroKoro_) {
 			//もしアニメが変わってなかったら変更
-			parent_->ChangeMotionS(Motion_Run, true, 1.1f); //モーション変更
+			parent_->ChangeMotionS(Motion_Run, true, 1.0f + moveSpeed_); //モーション変更
 		}
 
 		//スティックが離された瞬間
@@ -182,7 +204,10 @@ void PlayerMoveState::update()
 			&& nowAngle!=0
 			&& moveSpeed_ > MIN_SPEED/2) {
 			SState_ = brake;
+			//アニメは2種類
 			parent_->ChangeMotionS(Motion_Brake, true); //Brake
+			rowSpeedKoroKoro_ = false;
+			parent_->resetStateTimer();
 		}
 
 		
@@ -221,11 +246,13 @@ void PlayerMoveState::update()
 				) {
 				SState_ = brake;
 				parent_->ChangeMotionS(Motion_Brake, true); //Brake
+				parent_->resetStateTimer();
+				rowSpeedKoroKoro_ = false;
 			}
-			else {
+			else if(!rowSpeedKoroKoro_) {
 				moveSpeed_ = MIN_SPEED;
 				SState_ = SpeedUp;
-				parent_->ChangeMotionS(Motion_Run, true, 1.1f); //モーション変更
+				parent_->ChangeMotionS(Motion_Run, true, 1.0f + moveSpeed_); //モーション変更
 			}
 		}
 
@@ -245,13 +272,16 @@ void PlayerMoveState::update()
 		else {
 			moveSpeed_ = 0;
 			
-			parent_->ChangeMotionS(Motion_Idle, true); //モーション変更
+			
 			if (parent_->input_ != GSvector3::zero()) {
 				SState_ = SpeedUp;
+				parent_->ChangeMotionS(Motion_Run, true); //モーション変更
 			}
 			else {
 				SState_ = Stop;
+				parent_->ChangeMotionS(Motion_Idle, true); //モーション変更
 			}
+			parent_->resetStateTimer();
 		}
 
 		//向いてる方向に速度をかけて加速度にする
@@ -264,8 +294,11 @@ void PlayerMoveState::update()
 			parent_->velocity(GSvector3(my_Input_Direction_.x * 0.1f, 0.40f, my_Input_Direction_.z * 0.1f));
 			parent_->setCameraLookPoint(cameraLookPoint_);
 			parent_->ChangeMotionS(Motion_BackRolling, false); //モーション変更
+			rowSpeedKoroKoro_ = false;
 			return;
 		}
+
+		break;
 
 	}
 
@@ -296,6 +329,9 @@ void PlayerMoveState::update()
 	//最後に前のフレームの値をとっておく
 	if (nowAngle != 0.0f) {
 		previousAngle_ = nowAngle;
+	}
+	if (parent_->isGround()) {
+		previousPosition_ = position_;
 	}
 }
 void PlayerMoveState::lateUpdate()

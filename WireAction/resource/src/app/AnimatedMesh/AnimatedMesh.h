@@ -38,7 +38,7 @@ public:
 	void draw() const;
 	//モーションの変更
 	void change_motion(GSuint motion, bool loop = true);
-	void change_motionS(GSuint motion, bool loop = true, float speed = 1.0f, float lerp = 0.5f, float startTime = 0.0f);
+	void change_motionS(GSuint motion, bool loop = true, float speed = 1.0f, float lerp = 0.5f, float startTime = 0.0f,float endTime=0.0f);
 	//変換行列を設定する
 	void transform(const GSmatrix4& matrix);
 	//モーションが終了しているか？
@@ -75,6 +75,8 @@ private:
 	GSfloat		lerp_timer_;
 	//速度
 	GSfloat		motion_speed_;
+
+	GSfloat endTimePlus_;
 
 	//ボーンのローカル用変換行列
 	std::vector<GSmatrix4> local_bone_matrices_;

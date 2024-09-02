@@ -40,13 +40,7 @@ void PlayerDamageState::update()
 	parent_->gravityFall(1.0f);
 
 	
-	//アニメ終了でおわり
-	if (parent_->IsMotionEnd()) {
-		parent_->changeState(PlayerStateList::State_Walk);
-		parent_->ChangeMotionS(Motion_Idle, true); //モーション変更
-		
-		return;
-	}
+	
 
 	
 
@@ -63,11 +57,19 @@ void PlayerDamageState::update()
 	parent_->velocity().x = velocity_.x;
 	parent_->velocity().z = velocity_.z;
 
-	cameraLookPoint_ = parent_->GetPosition() + velocity_;
+	cameraLookPoint_ = parent_->GetPosition();
 
 
 	//注視点設定
 	parent_->setCameraLookPoint(cameraLookPoint_);
+
+	//アニメ終了でおわり
+	if (parent_->IsMotionEnd()) {
+		parent_->changeState(PlayerStateList::State_Walk);
+		parent_->ChangeMotionS(Motion_Idle, true); //モーション変更
+
+		return;
+	}
 
 	
 }

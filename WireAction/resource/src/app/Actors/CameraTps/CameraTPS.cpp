@@ -31,7 +31,6 @@ CameraTps::CameraTps(IWorld* world, const GSvector3& position, const GSvector3& 
 
 	startFlag_ = true;
 
-	cameraAngle_.y = 25;
 
 	
 
@@ -58,6 +57,7 @@ void CameraTps::update(float delta_time)
 	if (startFlag_) {
 		cameraAngle_.x = player->transform().localEulerAngles().y * (-1) + 270;
 		cameraAngle_.y = 25;
+		cameraDistance_ = 12.0f;
 		startFlag_ = false;
 	}
 
@@ -65,19 +65,46 @@ void CameraTps::update(float delta_time)
 	if (InputManager::IsCameraReset()) {
 		cameraAngle_.x = player->transform().localEulerAngles().y * (-1) + 270;
 		cameraAngle_.y = 25;
-	}
-
-	//入力
-	cameraAngle_.x += InputManager::CameraRotation().x * InputManager::GetCameraSensitivity() * delta_time;
-	if (InputManager::CameraRotation().y == -1 && cameraLevel_ == 0) {
-		cameraAngle_.y = 30;
-		cameraDistance_ = 20.0f;
-		cameraLevel_ = 1;
-	}
-	if (InputManager::CameraRotation().y == 1 && cameraLevel_ == 1) {
-		cameraAngle_.y = 20;
 		cameraDistance_ = 12.0f;
 		cameraLevel_ = 0;
+	}
+
+	//レベル0が近い
+	//レベル1が遠い
+	//レベル-1がもっと近い
+	//入力
+	cameraAngle_.x += InputManager::CameraRotation().x * InputManager::GetCameraSensitivity() * delta_time;
+	//遠くなる
+	if (InputManager::CameraRotation().y == -1 && !canNotCameraFlag_) {
+		if (cameraLevel_ == 0) {
+			cameraAngle_.y = 30;
+			cameraDistance_ = 20.0f;
+			cameraLevel_ = 1;
+		}
+		else if (cameraLevel_ == -1) {
+			cameraAngle_.y = 25;
+			cameraDistance_ = 12.0f;
+			cameraLevel_ = 0;
+		}
+		canNotCameraFlag_ = true;
+	}
+	//近くなる
+	if (InputManager::CameraRotation().y == 1 && !canNotCameraFlag_) {
+		if (cameraLevel_ == 1) {
+			cameraAngle_.y = 25;
+			cameraDistance_ = 12.0f;
+			cameraLevel_ = 0;
+		}
+		else if(cameraLevel_==0){
+			cameraAngle_.y = 20;
+			cameraDistance_ = 6.0f;
+			cameraLevel_ = -1;
+		}
+		canNotCameraFlag_ = true;
+	}
+
+	if (InputManager::CameraRotation() == GSvector2::zero()) {
+		canNotCameraFlag_ = false;
 	}
 
 	//cameraAngle_.y = 25;
@@ -111,14 +138,14 @@ void CameraTps::update(float delta_time)
 	//注視点の位置を求める(プレイヤーの頭部の少し上あたりの座標)
 	GSvector3 at = smoothPlayerLookPos_ + ReferencePointOffset;
 
-	// フィールドとの衝突判定
+	/*/ フィールドとの衝突判定
 	//collideField(0.1f);		//フィールドとの衝突判定
 	Line line{ at,position };
 	GSvector3 intersect;
 	if (world_->field()->collide(line, &intersect))
 	{
 		position = intersect;
-	}
+	}*/
 
 	//スムースダンプによる滑らかな補間
 	const float SmoothTime{ 12.0f };	//補間フレーム数12

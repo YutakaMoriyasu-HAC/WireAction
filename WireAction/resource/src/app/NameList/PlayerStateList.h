@@ -9,6 +9,7 @@ enum PlayerStateList {
 	State_QuickWire,
 	State_Crouch,
 	State_Damage,
+	State_BodyAttack,
 
 };
 

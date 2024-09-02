@@ -17,6 +17,9 @@ public:
 	//衝突リアクション
 	virtual void react(Actor& other) override;
 
+	void changeAngle(float time);
+	void collide_field();
+
 private:
 	//アニメーションメッシュ
 	AnimatedMesh	mesh_;
@@ -26,6 +29,19 @@ private:
 	//モーションのループ指定
 	bool			motion_loop_;
 	float timer_{ 0.0f };
+
+	//プレイヤーの場所
+	GSvector3 targetPosition_{ 0,0,0 };
+
+	//Actor player_;
+
+	std::shared_ptr<Actor> player_;
+
+	//向いてる方向
+	GSvector3 direction_{ 0,0,0 };
+
+	bool isWall_{ false };
+	bool isGround_{ false };
 
 };
 

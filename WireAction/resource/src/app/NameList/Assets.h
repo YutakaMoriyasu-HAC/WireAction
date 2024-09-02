@@ -14,6 +14,7 @@ enum {
 enum {
 	Texture_Skybox,
 	Texture_Wire,
+	Texture_Coin,
 };
 
 //オクトリー

@@ -39,6 +39,7 @@ void PlayerJumpState::init()
 
 	//ボタンを押している状態
 	buttonReleaseFlag_ = false;
+	isWallKick_ = false;
 
 
 }
@@ -72,6 +73,27 @@ void PlayerJumpState::update()
 		else {
 			parent_->velocity().y = 0.23f;
 		}
+		return;
+	}
+
+
+	//壁キック
+	if (parent_->canWallKick() && InputManager::IsAButtonTrigger()) {
+
+		buttonReleaseFlag_ = false;
+		my_Input_Direction_ *= -1;
+		velocity_ = my_Input_Direction_ * MAX_SPEED*4;
+		parent_->velocity(velocity_);
+		stateStartSpeed = sqrtf((velocity_.x * velocity_.x) + (velocity_.z * velocity_.z));
+		
+		
+		parent_->velocity().y = 0.32f;
+		isWallKick_ = true; //上昇しなくなったらfalseにする
+		cameraLookPoint_.y = cameraLookPoint_.y + parent_->GetPosition().y;
+
+		changeAngle(600.0f);
+		//いろいろ変えちゃった回転方向を親に返す
+		parent_->SetInputDirection(my_Input_Direction_);
 		return;
 	}
 
@@ -120,6 +142,7 @@ void PlayerJumpState::update()
 		changeAngle(600.0f);
 		//いろいろ変えちゃった回転方向を親に返す
 		parent_->SetInputDirection(my_Input_Direction_);
+		parent_->changeState(PlayerStateList::State_BodyAttack);
 		return;
 	}
 	
@@ -161,6 +184,10 @@ void PlayerJumpState::update()
 			velocity_.y = 0;
 		}
 	}
+	//下向きなら壁キック終わり
+	if (velocity_.y <= 0 && isWallKick_) {
+		isWallKick_ = false;
+	}
 
 	
 
@@ -173,7 +200,7 @@ void PlayerJumpState::update()
 	
 
 	//スティック入力があった時、現在のベクトルからスティック入力方向までのベクトルを求める
-	if (parent_->input_ != GSvector3::zero()) {
+	if (parent_->input_ != GSvector3::zero() && !isWallKick_) {
 
 		
 

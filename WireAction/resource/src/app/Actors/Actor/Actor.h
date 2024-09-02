@@ -35,6 +35,11 @@ public:
 	void collide(Actor& other);
 	//線分との衝突判定
 	bool collide(const Line& line, GSvector3* intersect) const;
+
+	//アクターとの衝突処理
+	void collide_actor(Actor& other);
+
+
 	//死亡する
 	void die();
 	//衝突しているか？
@@ -60,6 +65,8 @@ public:
 	BoundingSphere collider() const;
 	// 指定された場所までTweenで移動する
 	TweenUnit& move_to(const GSvector3& to, float duration);
+	//自然落下
+	void gravityFall(float delta_time);
 
 	
 	//コピー禁止
@@ -87,6 +94,9 @@ protected:
 	BoundingSphere	collider_;
 	//死亡フラグ
 	bool			dead_{ false };
+
+	//重力値
+	const float Gravity{ -0.016f }; //-0.016 //-0.008
 };
 
 #endif

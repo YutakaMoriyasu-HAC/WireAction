@@ -17,7 +17,8 @@ AnimatedMesh::AnimatedMesh(GSuint id, GSuint motion, bool loop, GSuint num_bones
 	lerp_timer_{ 0.0f },
 	local_bone_matrices_{ num_bones },
 	bone_matrices_{ num_bones },
-	motion_speed_{ 1.0f } {
+	motion_speed_{ 1.0f },
+	endTimePlus_{0.0f} {
 }
 
 
@@ -29,17 +30,17 @@ void AnimatedMesh::update(float delta_time) {
 	GSfloat prev_timer = motion_timer_;
 	// アニメーションタイマの更新
 	motion_timer_ += delta_time * motion_speed_;
-	// ループアニメーションか？
-	if (motion_loop_)
-	{
-		// モーションタイマをループさせる           終了時間に加速を
-		motion_timer_ = std::fmod(motion_timer_, motionEndTime() * motion_speed_);
+	// ループさせる
+	if (motion_timer_ > motionEndTime() - endTimePlus_) {
+		if (motion_loop_) {
+			motion_timer_ = 0;
+		}
+		else {
+			motion_timer_ = motionEndTime() - endTimePlus_;
+		}
 	}
-	else
-	{
-		// モーションタイマをクランプする
-		motion_timer_ = std::min(motion_timer_, motionEndTime() - 1.0f);
-	}
+
+
 	// 補間タイマの更新(LerpTime以上にならないようにクランプする）
 	lerp_timer_ = std::min(lerp_timer_ + delta_time, LerpTime);
 	// モーションがループしたかどうか。
@@ -70,7 +71,7 @@ void AnimatedMesh::update(float delta_time) {
 
 	if (is_end_motion())
 	{
-		motion_speed_ = 1.0f;
+		//motion_speed_ = 1.0f;
 	}
 }
 
@@ -114,7 +115,7 @@ void AnimatedMesh::change_motion(GSuint motion, bool loop) {
 }
 
 //モーションの変更
-void AnimatedMesh::change_motionS(GSuint motion, bool loop, float speed, float lerp, float startTime) {
+void AnimatedMesh::change_motionS(GSuint motion, bool loop, float speed, float lerp, float startTime, float endTime) {
 	//現在と同じモーションの場合は何もしない
 	if (motion_ == motion) return;
 	//補間中(前半)は、前回のモーションを更新しないようにする
@@ -133,6 +134,9 @@ void AnimatedMesh::change_motionS(GSuint motion, bool loop, float speed, float l
 	motion_loop_ = loop;
 
 	motion_speed_ = speed;
+
+	//終わりの時間
+	endTimePlus_=endTime;
 }
 
 //座標変換を行う
@@ -156,7 +160,7 @@ bool AnimatedMesh::is_end_motion() const {
 	//ループのモーションは終了しない
 	if (motion_loop_)return false;
 	//終了しているか？
-	return motion_timer_ >= (motionEndTime() - 1.0f);
+	return motion_timer_ >= (motionEndTime() - endTimePlus_);
 }
 
 //現在のモーションの再生時間を取得

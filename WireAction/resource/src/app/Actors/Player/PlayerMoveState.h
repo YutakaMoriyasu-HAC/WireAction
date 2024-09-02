@@ -64,6 +64,12 @@ private:
 
 	//前のフレームの向き
 	float previousAngle_{ 0.0f };
+
+	//前のフレームの場所
+	GSvector3 previousPosition_{ 0,0,0 };
+
+	//低速ころころ
+	bool rowSpeedKoroKoro_{ false };
 };
 
 

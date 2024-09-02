@@ -7,6 +7,7 @@
 #include "app/NameList/Assets.h"
 #include "app/Actors/Ball/Ball.h"
 #include "app/Actors/Enemy/Enemy.h"
+#include "app/Actors/Coin/Coin.h"
 #include <GSstandard_shader.h>
 
 //開始
@@ -36,7 +37,9 @@ void GamePlayScene::start() {
 	// リフレクションプローブの読み込み
 	gsLoadReflectionProbe(ReflectionProbe, "resource/Assets/TestStage/ReflectionProbe.txt");
 
+	//テクスチャの読み込み
 	gsLoadTexture(Texture_Wire, "resource/Assets/Ball/wire.png");
+	gsLoadTexture(Texture_Coin, "resource/Assets/Coin/NewCoin.png");
 	
 
 	//フィールドクラスの追加
@@ -46,9 +49,14 @@ void GamePlayScene::start() {
 	world_.add_actor(std::make_shared<Player>(&world_, GSvector3(0.0f, 0.125f, 0.0f)));
 
 	//ballオブジェクトを配置(仮)
-	world_.add_actor(std::make_shared<Ball>(&world_, GSvector3(0.0f, 6.0f, 0.0f)));
-	world_.add_actor(std::make_shared<Ball>(&world_, GSvector3(-6.0f, 6.0f, -6.0f)));
+	world_.add_actor(std::make_shared<Ball>(&world_, GSvector3(0.0f, 6.0f, 5.0f)));
+	world_.add_actor(std::make_shared<Ball>(&world_, GSvector3(-6.0f, 6.0f, -12.0f)));
 	world_.add_actor(std::make_shared<Ball>(&world_, GSvector3(10.0f, 12.0f, -7.0f)));
+
+	//コイン
+	world_.add_actor(std::make_shared<Coin>(&world_, GSvector3(-10.0f, 4.0f, -10.0f)));
+	world_.add_actor(std::make_shared<Coin>(&world_, GSvector3(-8.0f, 4.0f, -10.0f)));
+	world_.add_actor(std::make_shared<Coin>(&world_, GSvector3(-6.0f, 4.0f, -10.0f)));
 
 	//敵
 	world_.add_actor(std::make_shared<Enemy>(&world_, GSvector3(11.0f, 0.5f, 10.0f)));
