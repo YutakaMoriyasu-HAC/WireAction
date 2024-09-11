@@ -24,21 +24,27 @@ PlayerMoveState::PlayerMoveState(Player* parent, IWorld* world, app::StateMachin
 // 初期化
 void PlayerMoveState::init()
 {
-	
+	//速度継承
+	velocity_ = parent_->velocity();
+
 	my_Input_Direction_ = parent_->GetInput();
 	if (parent_->GetMotionState() == Motion_Rolling) {
 		rowSpeedKoroKoro_ = true;
 	}
 	else {
-		parent_->ChangeMotionS(Motion_Idle, true, 1.0f + moveSpeed_); //モーション変更
+		if (velocity_.x == 0 && velocity_.z == 0) {
+			parent_->ChangeMotionS(Motion_Idle, true); //モーション変更
+		}
+		else {
+			parent_->ChangeMotionS(Motion_Run, true, 1.0f + moveSpeed_ * 10.0f); //モーション変更
+		}
 	}
 	
 
 	//カメラ座標
 	cameraLookPoint_ = parent_->getCameraLookPoint();
 
-	//速度継承
-	velocity_= parent_->velocity();
+	
 
 	//このステートが始まった時の速度をここで求めておく
 	//通常の歩行よりも速いスピードのまま歩き状態になった時、その速度を維持するということ
@@ -47,6 +53,7 @@ void PlayerMoveState::init()
 	//入力があれば加速、無ければ止まる
 	if (parent_->input_ != GSvector3::zero()) {
 		SState_ = SpeedUp;
+		
 	}
 	else {
 		SState_ = SpeedDown;

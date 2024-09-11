@@ -25,6 +25,11 @@ public:
 	void ChangeMotionS(GSuint motion, bool loopFlag = true, float speed = 1, float lerp = 0.5f, float endTime = 0.0f, float startTime = 0.0f);
 	// モーションの終了時間を取得
 	const float GetMotionEndTime() const;
+	//モーションがループするか
+	const bool IsMotionRoop() const;
+	//モーション時間をリセット
+	void motionTimeReset();
+
 	//プレイヤーの座標を他のクラスに受け渡すときの関数
 	const GSvector3 GetPosition() const;
 	//他のクラスから受け取った座標を変数にする関数
@@ -97,6 +102,10 @@ public:
 
 	//無敵時間さん
 	void startInvincibilityTime();
+
+	//空中ジャンプ回数-1
+	bool canAirJump();
+
 
 
 private:
@@ -187,6 +196,12 @@ private:
 	//無敵かどうか
 	bool isInvincible_{ false };
 	float invincibleTimer_{ 0.0f };
+
+	//法線p
+	GSvector3 p{ 0,0,0 };
+
+	//空中ジャンプ回数
+	int airJumpNum_{ 1 };
 };
 
 #endif

@@ -10,4 +10,7 @@ const int GameManager::HowMuchCoins() {
 //ƒRƒCƒ“‘Œ¸
 const void GameManager::CoinPlus(int num) {
 	coin_ += num;
+	if (coin_ < 0) {
+		coin_ = 0;
+	}
 }

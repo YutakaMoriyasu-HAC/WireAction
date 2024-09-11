@@ -30,6 +30,8 @@ const float PlayerRadius{ 0.5f };
 
 //ミスとなるy座標
 const float MissPosition_{ -30.0f };
+//空中ジャンプの最大数
+const int MaxAirJumpNum_{ 1 };
 
 
 //コンストラクタ
@@ -54,6 +56,9 @@ Player::Player(IWorld* world, const GSvector3& position) :
 	InitState();
 	lerpSize_ = mesh_.DefaultLerpTime;
 	lastPosition_ = position;
+
+	//空中ジャンプ回数リセット
+	airJumpNum_ = MaxAirJumpNum_;
 
 	
 }
@@ -93,9 +98,8 @@ void Player::update(float delta_time) {
 	//奈落に落ちたとき
 	if (transform_.position().y < MissPosition_) {
 		velocity_ = GSvector3::zero();
-		GSvector3 finalPosition = lastPosition_;
-		finalPosition.y += 1.5f;
 		transform_.position(lastPosition_);
+		GameManager::CoinPlus(-5); //コイン-5枚失う
 	}
 
 	//無敵時間
@@ -137,6 +141,9 @@ void Player::lateUpdate(float delta_time) {
 	ImGui::Text("motioinEndTime:%f", mesh_.motionEndTime());
 	ImGui::Text("motionEnd:%s", canWallKick_ ? "true" : "false");
 	ImGui::Text("coin:%d",GameManager::HowMuchCoins());
+	ImGui::Text("px:%f", p.x);
+	ImGui::Text("py:%f", p.y);
+	ImGui::Text("pz:%f", p.z);
 
 
 	ImGui::End();
@@ -209,6 +216,7 @@ void Player::ChangeMotionS(GSuint motion, bool loopFlag, float speed, float lerp
 	motion_ = motion;
 	motionLoop_ = loopFlag;
 	state_timer_ = 0.0f;
+	
 	startTime_ = startTime;
 	animSpeed_ = speed;
 	lerpSize_ = lerp;
@@ -220,6 +228,17 @@ void Player::ChangeMotionS(GSuint motion, bool loopFlag, float speed, float lerp
 const float Player::GetMotionEndTime() const
 {
 	return mesh_.motionEndTime() - motionEndTimePlus_;
+}
+
+//モーションがループするか
+const bool Player::IsMotionRoop() const
+{
+	return motionLoop_;
+}
+
+//モーション時間だけリセット
+void Player::motionTimeReset() {
+	mesh_.motion_time(0.0f);
 }
 
 //座標を返す
@@ -270,6 +289,7 @@ void Player::collide_field() {
 		wallLine.start = position + collider_.center_;
 		wallLine.end = position + collider_.center_ + GetInput();
 		GSvector3 intersect;	//地面との交点
+		
 		if (world_->field()->collide(wallLine, &intersect)) {
 			canWallKick_ = true;
 			wallKickPosition_ = intersect;
@@ -277,7 +297,7 @@ void Player::collide_field() {
 		else {
 			canWallKick_ = false;
 		}
-
+		
 
 	}
 	else {
@@ -292,7 +312,8 @@ void Player::collide_field() {
 	line.end = position + GSvector3{ 0.0f,footOffset_, 0.0f };
 	GSvector3 intersect;	//地面との交点
 
-	if (world_->field()->collide(line, &intersect) && footOffset_<0) {
+	GSplane plane; //法線の情報
+	if (world_->field()->collide(line, &intersect, &plane) && footOffset_<0) {
 		//交点の位置からy座標のみ補正する
 		position.y = intersect.y;
 		//座標を変更する
@@ -300,10 +321,15 @@ void Player::collide_field() {
 		//重力を初期化する
 		velocity_.y = 0.0f;
 		isGround_ = true;
+		p = plane.normal;
+
+		//空中ジャンプ回数リセット
+		airJumpNum_ = MaxAirJumpNum_;
 	}
 	else {
 		isGround_ = false;
 	}
+	
 
 }
 
@@ -483,4 +509,15 @@ void Player::setLastPosition(GSvector3 position) {
 void Player::startInvincibilityTime() {
 	invincibleTimer_ = 120.0f;
 	isInvincible_ = true;
+}
+
+//空中ジャンプ可能か判断して回数-1
+bool Player::canAirJump() {
+	if (airJumpNum_ > 0) {
+		airJumpNum_ -= 1;
+		return true;
+	}
+	else {
+		return false;
+	}
 }
