@@ -14,6 +14,7 @@
 #include "PlayerBodyAttackState.h"
 #include "app/Input/InputManager.h"
 #include "app/Actors/WireBeam/WireBeam.h"
+#include "app/Input/GameManager.h"
 #include <imgui/imgui.h>
 
 
@@ -135,6 +136,7 @@ void Player::lateUpdate(float delta_time) {
 	ImGui::Text("motioin:%d", motion_);
 	ImGui::Text("motioinEndTime:%f", mesh_.motionEndTime());
 	ImGui::Text("motionEnd:%s", canWallKick_ ? "true" : "false");
+	ImGui::Text("coin:%d",GameManager::HowMuchCoins());
 
 
 	ImGui::End();

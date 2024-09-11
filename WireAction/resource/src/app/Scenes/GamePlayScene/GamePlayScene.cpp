@@ -24,6 +24,7 @@ void GamePlayScene::start() {
 	//gsLoadMesh(Mesh_PlayerBall, "resource/Assets/PlayerDog/playerBall.msh");
 	gsLoadMesh(Mesh_Ball, "resource/Assets/Ball/Ball.msh");
 	gsLoadSkinMesh(Mesh_EnemyBird, "resource/Assets/Enemy/EnemyBird/EnemyBird.mshb");
+	gsLoadMesh(Mesh_Coin, "resource/Assets/Coin/coin.msh");
 
 	//スカイドーム用のメッシュを読み込む
 	gsLoadMeshFixed(Mesh_Skybox, "resource/Assets/Skybox/skydome.msh");
@@ -134,6 +135,7 @@ void GamePlayScene::end() {
 	gsDeleteMesh(Mesh_Skybox);
 	gsDeleteMesh(Mesh_Ball);
 	gsDeleteSkinMesh(Mesh_EnemyBird);
+	gsDeleteMesh(Mesh_Coin);
 	//gsDeleteMesh(Mesh_PlayerBall);
 	//オクトリーの削除
 	gsDeleteOctree(Octree_Stage);

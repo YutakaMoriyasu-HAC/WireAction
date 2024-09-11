@@ -116,6 +116,10 @@ void AnimatedMesh::change_motion(GSuint motion, bool loop) {
 
 //モーションの変更
 void AnimatedMesh::change_motionS(GSuint motion, bool loop, float speed, float lerp, float startTime, float endTime) {
+
+	//速さだけは更新
+	motion_speed_ = speed;
+
 	//現在と同じモーションの場合は何もしない
 	if (motion_ == motion) return;
 	//補間中(前半)は、前回のモーションを更新しないようにする
@@ -133,7 +137,7 @@ void AnimatedMesh::change_motionS(GSuint motion, bool loop, float speed, float l
 	//モーションループフラグの設定
 	motion_loop_ = loop;
 
-	motion_speed_ = speed;
+	
 
 	//終わりの時間
 	endTimePlus_=endTime;

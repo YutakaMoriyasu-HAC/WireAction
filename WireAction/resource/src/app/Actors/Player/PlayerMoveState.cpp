@@ -125,7 +125,7 @@ void PlayerMoveState::update()
 	//低速ころころ終了
 	if (parent_->IsMotionEnd() && rowSpeedKoroKoro_) {
 		rowSpeedKoroKoro_ = false;
-		parent_->ChangeMotionS(Motion_Run, true,1.0f+moveSpeed_); //モーション変更
+		parent_->ChangeMotionS(Motion_Run, true, 1.0f + moveSpeed_ * 10.0f); //モーション変更
 		parent_->resetStateTimer();
 	}
 
@@ -146,7 +146,7 @@ void PlayerMoveState::update()
 		if (parent_->input_ != GSvector3::zero()) {
 			moveSpeed_ = MIN_SPEED;
 			SState_ = SpeedUp;
-			parent_->ChangeMotionS(Motion_Run, true, 1.0f + moveSpeed_); //モーション変更
+			parent_->ChangeMotionS(Motion_Run, true, 1.0f + moveSpeed_ * 10.0f); //モーション変更
 			my_Input_Direction_ = parent_->GetInput();
 		}
 
@@ -180,9 +180,9 @@ void PlayerMoveState::update()
 			stateStartSpeed = moveSpeed_;
 			
 
-		}else if (parent_->GetMotionState() != Motion_Run && !rowSpeedKoroKoro_) {
+		}else if (!rowSpeedKoroKoro_) {
 			//もしアニメが変わってなかったら変更
-			parent_->ChangeMotionS(Motion_Run, true, 1.0f + moveSpeed_); //モーション変更
+			parent_->ChangeMotionS(Motion_Run, true, 1.0f + moveSpeed_ * 10.0f); //モーション変更
 		}
 
 		//スティックが離された瞬間
@@ -217,6 +217,21 @@ void PlayerMoveState::update()
 		break;
 
 	case SpeedDown:
+
+		if (moveSpeed_ > MAX_SPEED*1.2f) {
+			//転がり中は減衰
+			parent_->ChangeMotionS(Motion_Rolling, true, moveSpeed_ * 10.0f, 0.5f, 8); //モーション変更
+			//parent_->ChangeMotionS(Motion_Run, true, 1.0f + moveSpeed_); //モーション変更
+
+
+		}
+		else if (parent_->GetMotionState() != Motion_Run && !rowSpeedKoroKoro_) {
+			//もしアニメが変わってなかったら変更
+			parent_->ChangeMotionS(Motion_Run, true, 1.0f + moveSpeed_ * 10.0f); //モーション変更
+		}
+
+
+
 		if (moveSpeed_ - ACCELERATION*2 > 0) {
 			moveSpeed_ -= ACCELERATION * 2;
 			//速度調整
@@ -252,7 +267,7 @@ void PlayerMoveState::update()
 			else if(!rowSpeedKoroKoro_) {
 				moveSpeed_ = MIN_SPEED;
 				SState_ = SpeedUp;
-				parent_->ChangeMotionS(Motion_Run, true, 1.0f + moveSpeed_); //モーション変更
+				parent_->ChangeMotionS(Motion_Run, true, 1.0f + moveSpeed_ * 10.0f); //モーション変更
 			}
 		}
 
@@ -275,7 +290,7 @@ void PlayerMoveState::update()
 			
 			if (parent_->input_ != GSvector3::zero()) {
 				SState_ = SpeedUp;
-				parent_->ChangeMotionS(Motion_Run, true); //モーション変更
+				parent_->ChangeMotionS(Motion_Run, true, 1.0f + moveSpeed_ * 10.0f); //モーション変更
 			}
 			else {
 				SState_ = Stop;

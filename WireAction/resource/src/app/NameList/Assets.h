@@ -8,6 +8,7 @@ enum {
 	Mesh_Ball,
 	Mesh_EnemyBird,
 	Mesh_PlayerBall,
+	Mesh_Coin,
 };
 
 //テクスチャ

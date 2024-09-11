@@ -2,6 +2,7 @@
 #define COIN_H_
 
 #include "app/Actors/Actor/Actor.h"
+#include "app/AnimatedMesh/AnimatedMesh.h"
 
 class Coin :public Actor
 {
@@ -17,9 +18,13 @@ public:
 	virtual void react(Actor& other) override;
 
 private:
+	//アニメーションメッシュ
+	AnimatedMesh	mesh_;
 
 	float timer_{ 0.0f };
 	int animPatarn_{ 0 };
+
+	bool texture2D_{ false };
 
 };
 

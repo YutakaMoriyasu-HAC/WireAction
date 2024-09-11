@@ -169,6 +169,7 @@
     <ClCompile Include="resource\src\app\Effect\EffectManager.cpp" />
     <ClCompile Include="resource\src\app\Effect\FollowEffect.cpp" />
     <ClCompile Include="resource\src\app\Field\Field.cpp" />
+    <ClCompile Include="resource\src\app\Input\GameManager.cpp" />
     <ClCompile Include="resource\src\app\Input\InputManager.cpp" />
     <ClCompile Include="resource\src\app\Light\Light.cpp" />
     <ClCompile Include="resource\src\app\Main\main.cpp" />
@@ -212,6 +213,7 @@
     <ClInclude Include="resource\src\app\Effect\EffectManager.h" />
     <ClInclude Include="resource\src\app\Effect\FollowEffect.h" />
     <ClInclude Include="resource\src\app\Field\Field.h" />
+    <ClInclude Include="resource\src\app\Input\GameManager.h" />
     <ClInclude Include="resource\src\app\Input\InputManager.h" />
     <ClInclude Include="resource\src\app\Light\Light.h" />
     <ClInclude Include="resource\src\app\Math\Math.h" />
