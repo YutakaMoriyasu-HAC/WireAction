@@ -15,6 +15,7 @@
 #include "app/Input/InputManager.h"
 #include "app/Actors/WireBeam/WireBeam.h"
 #include "app/Input/GameManager.h"
+#include "app/Effect/FollowEffect.h"
 #include <imgui/imgui.h>
 
 
@@ -165,6 +166,10 @@ void Player::draw() const {
 //衝突リアクション
 void Player::react(Actor& other) {
 	
+	if (other.tag() == "ItemTag") {
+		effectGetCoin_ = world_->addEffect(std::make_shared<FollowEffect>(Effect_GetCoin, this, GSvector3{ 0,0.5f,0 }, 100, 0.8f, false));
+	}
+
 	if (isInvincible_)return;
 
 	//敵と衝突したか？

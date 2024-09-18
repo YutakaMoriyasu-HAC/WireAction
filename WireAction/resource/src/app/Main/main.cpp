@@ -1,4 +1,5 @@
 #include<GSgame.h>
+#include <GSeffect.h>
 #include"app/Scenes/SceneManager/SceneManager.h"
 #include "app/Scenes/GamePlayScene/GamePlayScene.h"
 #include "app/screen/ScreenSize.h"
@@ -28,6 +29,10 @@ public:
 
 	//開始
 	void start() override {
+
+		// エフェクトの初期化
+		gsInitEffect();
+
 		//ゲームプレイシーンの追加
 		scene_manager_.add("GamePlayScene", new GamePlayScene());
 		//タイトルシーンから開始
@@ -60,6 +65,9 @@ public:
 		scene_manager_.end();
 		//シーンの消去
 		scene_manager_.clear();
+
+		// エフェクトの終了
+		gsFinishEffect();
 	}
 
 	bool is_running() override {

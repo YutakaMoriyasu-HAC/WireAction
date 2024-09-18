@@ -9,6 +9,8 @@
 #include "app/Actors/Enemy/Enemy.h"
 #include "app/Actors/Coin/Coin.h"
 #include <GSstandard_shader.h>
+#include <gslib.h>
+#include <GSeffect.h>
 
 //開始
 void GamePlayScene::start() {
@@ -41,6 +43,9 @@ void GamePlayScene::start() {
 	//テクスチャの読み込み
 	gsLoadTexture(Texture_Wire, "resource/Assets/Ball/wire.png");
 	gsLoadTexture(Texture_Coin, "resource/Assets/Coin/NewCoin.png");
+
+	//エフェクト
+	gsLoadEffect(Effect_GetCoin, "resource/Assets/Effect/PickUpItem/PickUpItem04.efkefc");
 	
 
 	//フィールドクラスの追加
@@ -136,7 +141,10 @@ void GamePlayScene::end() {
 	gsDeleteMesh(Mesh_Ball);
 	gsDeleteSkinMesh(Mesh_EnemyBird);
 	gsDeleteMesh(Mesh_Coin);
-	//gsDeleteMesh(Mesh_PlayerBall);
+
+	gsDeleteEffect(Effect_GetCoin);
+	
+
 	//オクトリーの削除
 	gsDeleteOctree(Octree_Stage);
 	gsDeleteOctree(Octree_Collider);

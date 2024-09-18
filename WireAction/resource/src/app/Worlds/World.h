@@ -1,8 +1,9 @@
 #ifndef WORLD_H_
 #define WORLD_H_
 
-#include "app/Worlds/IWorld.h"
+#include "IWorld.h"
 #include "app/Actors/ActorManager/ActorManager.h"
+#include "app/Effect/EffectManager.h"
 #include <gslib.h>
 
 //ワールドクラス
@@ -47,6 +48,13 @@ public:
 	//フィールドの取得
 	virtual std::shared_ptr<Field> field() override;
 
+	// Effectの追加
+	Effect* addEffect(std::shared_ptr<Effect> effect) override;
+	// Effectの検索
+	std::shared_ptr<Effect> findEffect(const std::string& name) override;
+	//エフェクトのクリア
+	virtual void EffectClear()override;
+
 	//コピー禁止
 	World(const World& other) = delete;
 	World& operator = (const World& other) = delete;
@@ -54,6 +62,8 @@ public:
 private:
 	//アクターマネージャー
 	ActorManager actors_;
+	// Effectマネージャー
+	EffectManager effectManager_;
 	//ライト
 	std::shared_ptr<Actor>		 light_{ nullptr };
 	//カメラ

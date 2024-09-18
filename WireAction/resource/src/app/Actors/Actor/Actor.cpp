@@ -49,14 +49,12 @@ void Actor::collide_actor(Actor& other) {
 	//相手との距離
 	float distance = GSvector3::distance(position, target);
 	//衝突判定球の半径同士を加えた長さを求める
-	float length = collider_.radius_ + other.collider().radius_;
+	float length = collider().radius_ + other.collider().radius_;
 	//衝突判定球の重なっている長さを求める
 	float overlap = length - distance;
 	//重なっている部分の半分の距離だけ離れる移動量を求める
 	GSvector3 v = (position - target).getNormalized() * overlap * 0.5f;
-	transform_.translate(-v, GStransform::Space::World);
-	//フィールドとの衝突判定
-	//collide_field();
+	transform_.translate(v, GStransform::Space::World);
 }
 
 //死亡する

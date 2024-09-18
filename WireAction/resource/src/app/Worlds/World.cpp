@@ -1,6 +1,7 @@
 #include "app/Worlds/World.h"
 #include "app/Field/Field.h"
 #include "app/Actors/Actor/Actor.h"
+#include <GSeffect.h>
 
 //デストラクタ
 World::~World() {
@@ -25,6 +26,10 @@ void World::update(float delta_time) {
 	camera_->update(delta_time);
 	//ライトの更新
 	light_->update(delta_time);
+	// エフェクトのupdate
+	effectManager_.update(delta_time);
+	// エフェクトの更新処理
+	gsUpdateEffect(delta_time);
 }
 
 //描画
@@ -32,6 +37,8 @@ void World::draw() const {
 	
 	//カメラの設定
 	camera_->draw();
+	//エフェクト用のカメラを設定
+	gsSetEffectCamera();
 	//ライトの設定
 	light_->draw();
 
@@ -44,6 +51,10 @@ void World::draw() const {
 	actors_.draw();
 	//半透明アクターの描画
 	actors_.draw_transparent();
+	// エフェクトのdraw
+	effectManager_.draw();
+	// エフェクトの描画
+	gsDrawEffect();
 	//GUIの描画
 	actors_.draw_gui();
 }
@@ -56,6 +67,8 @@ void World::clear() {
 	camera_.reset();
 	// ライトを消去
 	light_.reset();
+	//エフェクトのクリア
+	effectManager_.clear();
 }
 
 //カメラの追加
@@ -125,4 +138,23 @@ std::shared_ptr<Actor> World::light() {
 //フィールドの取得
 std::shared_ptr<Field> World::field() {
 	return field_;
+}
+
+//エフェクトの追加
+Effect* World::addEffect(std::shared_ptr<Effect> effect)
+{
+	effectManager_.add(effect);
+	return effect.get();
+}
+
+//エフェクトの検索
+std::shared_ptr<Effect> World::findEffect(const std::string& name)
+{
+	return effectManager_.findEffect(name);
+}
+
+//エフェクトのクリア
+void World::EffectClear()
+{
+	effectManager_.clear();
 }

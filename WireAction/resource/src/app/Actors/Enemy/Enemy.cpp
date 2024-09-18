@@ -93,7 +93,7 @@ void Enemy::react(Actor& other) {
 		timer_ = 50.0f;
 		
 	}
-	if (other.tag() == "EnemyTag" && motion_!=Motion_Idle) {
+	if (other.tag() == "EnemyTag" ) {
 		collide_actor(other);
 		collide_field();
 	}

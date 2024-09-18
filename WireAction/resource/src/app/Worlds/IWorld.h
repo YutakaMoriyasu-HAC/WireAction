@@ -7,6 +7,7 @@
 
 class Actor;
 class Field;
+class Effect;
 
 //ワールド抽象インターフェース
 class IWorld {
@@ -33,6 +34,13 @@ public:
 	virtual std::shared_ptr<Actor> camera() = 0;
 	//ライトの取得
 	virtual std::shared_ptr<Actor> light() = 0;
+
+	// エフェクトの追加
+	virtual Effect* addEffect(std::shared_ptr<Effect> effect) = 0;
+	// エフェクトの検索
+	virtual std::shared_ptr<Effect> findEffect(const std::string& name) = 0;
+	//エフェクトのクリア
+	virtual void EffectClear() = 0;
 };
 
 #endif

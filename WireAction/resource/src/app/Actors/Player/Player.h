@@ -4,6 +4,7 @@
 #include "app/Actors/Actor/Actor.h"
 #include "app/AnimatedMesh/AnimatedMesh.h"
 #include "app/StateMachine/StateMachine.h"
+#include"app/Effect/FollowEffect.h"
 
 //プレイヤークラス
 class Player : public Actor {
@@ -202,6 +203,9 @@ private:
 
 	//空中ジャンプ回数
 	int airJumpNum_{ 1 };
+
+	//エフェクト
+	Effect* effectGetCoin_;
 };
 
 #endif

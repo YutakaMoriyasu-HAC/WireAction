@@ -3,6 +3,7 @@
 
 #include "app/Scenes/IScene/IScene.h"
 #include "app/Worlds/World.h"
+#include <gslib.h>
 
 //ゲームプレイシーン
 class GamePlayScene : public IScene {
